@@ -1,10 +1,11 @@
+from collections import Counter
+
 import numpy as np
 
 
 class Sudoku(object):
     def __init__(self, cells):
-        # self.cells = np.array([["%d,%d" % (j, i) for i in range(9)] for j in range(9)])
-        self.cells = np.array([[set(range(9)) for i in range(9)]
+        self.cells = np.array([[set(range(1, 10)) for i in range(9)]
                                for j in range(9)])
         for index, value in cells.items():
             self.cells[index] = {value}
@@ -32,12 +33,18 @@ class Sudoku(object):
     def solve(self):
 
         it = 0
-        
+
+        hash_0 = self.hash()
         while True:
-            for i in range(3):
+
+            print it
+            print self.counts()
+            print
+
+            for i in range(9):
                 self.eliminate(self.cells[i, :])
     
-            for j in range(3):
+            for j in range(9):
                 self.eliminate(self.cells[:, j])
     
             for i in range(3):
@@ -50,7 +57,13 @@ class Sudoku(object):
 
             it += 1
 
-            if it == 100:
+            hash_1 = self.hash()
+            if hash_0 == hash_1:
+                print self.counts()
+                print RuntimeError("Failed: grid unaltered")
+            hash_0 = hash_1
+            
+            if it == 10:
                 return self
             
             
@@ -61,28 +74,32 @@ class Sudoku(object):
         for values in cells:
             if len(values) == 1:
                 [value] = values
-                try:
-                    assert value not in determined
-                except:
-                    print 'Expected value (%s) to not be in determined (%s)' % (
-                        value,
-                        sorted(determined))
-                    print self
-                    raise
+                assert value not in determined
                 determined.update(values)
 
         # Remove them from the other cells
         for values in cells:
             if len(values) > 1:
                 if determined & values:
-                    print "Eliminating %s from cell containing %s" % (
-                        str(sorted(determined & values)),
-                        sorted(values))
+                    # print "Eliminating %s from cell containing %s" % (
+                    #     str(sorted(determined & values)),
+                    #     sorted(values))
+                    size = self.size()
                     values -= determined
+                    assert self.size() - size == len(determined & values)
                     if len(values) == 1:
                         print "Determined a value!"
                 
-                    
+    def counts(self):
+        return Counter(map(len, self.cells.ravel()))
+
+    def size(self):
+        return sum(self.counts().values())
+
+    def hash(self):
+        data = tuple(map(tuple, self.cells.ravel()))
+        return hash(data)
+    
     def __repr__(self):
         chars = ''
         for i in range(9):
