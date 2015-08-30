@@ -78,10 +78,11 @@ class Sudoku(object):
         # Remove determined values from the set of possibilities in other cells
         for values in cells:
             if len(values) > 1:
-                if determined & values:
+                intersection = determined & values
+                if intersection:
                     size = self.size()
                     values -= determined
-                    # assert self.size() - size == len(determined & values)
+                    assert size - self.size() == len(intersection)
                     if len(values) == 1:
                         if self.verbose:
                             print "Determined a value by only-possible-value!"
