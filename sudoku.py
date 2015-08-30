@@ -1,4 +1,5 @@
 from collections import Counter
+from collections import defaultdict
 
 import numpy as np
 
@@ -38,7 +39,7 @@ class Sudoku(object):
         while True:
 
             print it
-            print self.counts()
+            print self
             print
 
             for i in range(9):
@@ -60,23 +61,32 @@ class Sudoku(object):
             hash_1 = self.hash()
             if hash_0 == hash_1:
                 print self.counts()
-                print RuntimeError("Failed: grid unaltered")
+                print self
+                raise RuntimeError("Failed: grid unaltered")
             hash_0 = hash_1
             
-            if it == 10:
-                return self
-            
+            if it == 100:
+                raise RuntimeError("Failed: %d iterations with no solution" % it)
             
     def eliminate(self, cells):
         
         # Find all determined values
         determined = set()
-        for values in cells:
+        values2cells = defaultdict(set)
+        for k, values in enumerate(cells):
             if len(values) == 1:
                 [value] = values
                 assert value not in determined
                 determined.update(values)
+            for value in values:
+                values2cells[value].add(k)
 
+        for value, _cells in values2cells.items():
+            if len(_cells) == 1:
+                print "Determined a value by only-possible-cell!"
+                [cell] = _cells
+                cells[cell] = {value}
+                
         # Remove them from the other cells
         for values in cells:
             if len(values) > 1:
@@ -88,7 +98,7 @@ class Sudoku(object):
                     values -= determined
                     assert self.size() - size == len(determined & values)
                     if len(values) == 1:
-                        print "Determined a value!"
+                        print "Determined a value by only-possible-value!"
                 
     def counts(self):
         return Counter(map(len, self.cells.ravel()))
