@@ -67,25 +67,14 @@ class Sudoku(object):
         # Assign values that have only one possible cell
         for value, _cells in values2cells.items():
             if len(_cells) == 1:
-                if self.verbose:
-                    print "Determined a value by only-possible-cell!"
                 [cell] = _cells
-                assert value in cells[cell]
-                for _value in cells[cell].copy():
-                    if _value != value:
-                        cells[cell].remove(_value)
+                cells[cell].clear()
+                cells[cell].add(value)
 
         # Remove determined values from the set of possibilities in other cells
         for values in cells:
             if len(values) > 1:
-                intersection = determined & values
-                if intersection:
-                    size = self.size()
-                    values -= determined
-                    assert size - self.size() == len(intersection)
-                    if len(values) == 1:
-                        if self.verbose:
-                            print "Determined a value by only-possible-value!"
+                values -= determined
 
     def get_twist_cells(self):
         return [self.cells[index] for index in self.twist]
