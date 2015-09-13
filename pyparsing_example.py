@@ -1,24 +1,31 @@
-from pyparsing import *
+from pprint import pprint
+
+from pyparsing import Group
+from pyparsing import oneOf
+from pyparsing import Optional
+from pyparsing import ZeroOrMore
 
 
-text = "Angola and Namibia east to northeastern South Africa; Mozambique north to Kenya; Uganda"
-
-REGION_NAMES = ['angola', 'namibia', 'south africa', 'kenya', 'uganda']
-COMPASS_ADJECTIVES = ['northern', 'eastern', 'southern', 'western', 'northeastern', 'northwestern', 'southeastern', 'southwestern']
-CONJUNCTIONS = ['and', 'east to', 'north to']
-
-region_atom = oneOf(REGION_NAMES, caseless=True)
-compass_adjective = oneOf(COMPASS_ADJECTIVES, caseless=True)
-conjunction = oneOf(CONJUNCTIONS, caseless=True)
+region_atom = oneOf(['A', 'B', 'C', 'D', 'E'])
+fill_operator = oneOf(['to'])
+conjunction = oneOf([',', 'and'])
 
 
-def grammar1():
-    region = Group(Optional(compass_adjective) + region_atom)
-    region_set = region + ZeroOrMore(conjunction + region)
-    grammar = delimitedList(Group(region_set), delim=';')
-    return grammar
+text = 'A and B to C, D and E'
+
+expected = [
+    [
+        ['A', 'B'],
+        ['to'],
+        ['C'],
+    ],
+    'D',
+    'E',
+]
 
 
+region = Group(region_atom + Optional(fill_operator + region_atom))
+grammar = region + ZeroOrMore(conjunction + region)
 
 print text
-print grammar1().parseString(text)
+pprint(grammar.parseString(text).asList())
