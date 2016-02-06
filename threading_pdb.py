@@ -1,13 +1,17 @@
 from concurrent.futures import ThreadPoolExecutor
 from threading import Thread
 import ipdb as pdb
+import requests
+from time import sleep
 
 
 def task():
     print('In task')
-    a_variable = 1
-    print(a_variable)
-    pdb.set_trace()
+    while True:
+        a_variable = 1
+        print(requests.get('http://theguardian.com'))
+        pdb.set_trace()
+        sleep(1)
     return
 
 
