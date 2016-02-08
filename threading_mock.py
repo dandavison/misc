@@ -13,24 +13,28 @@ def patching_method(self):
     print('patched method')
 
 
+class Y(X):
+    pass
+
+
 def task():
-    X().method_to_patch()
+    Y().method_to_patch()
 
 
 print('Main thread')
-with mock.patch.object(X, 'method_to_patch', patching_method):
+with mock.patch.object(Y, 'method_to_patch', patching_method):
     task()
 print()
 
 print('`threading`')
-with mock.patch.object(X, 'method_to_patch', patching_method):
+with mock.patch.object(Y, 'method_to_patch', patching_method):
     thread = Thread(target=task)
     thread.start()
     thread.join()
 print()
 
 print('`concurrent.futures`')
-with mock.patch.object(X, 'method_to_patch', patching_method):
+with mock.patch.object(Y, 'method_to_patch', patching_method):
     with ThreadPoolExecutor(max_workers=1) as executor:
         future = executor.submit(task)
         _ = future.result()
