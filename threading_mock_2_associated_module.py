@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from concurrent.futures import ThreadPoolExecutor
+from threading_mock_2_associated_module_2 import TaskRunner
 
 
 class X:
@@ -14,14 +14,5 @@ class Y(X):
 def task():
     Y().method_to_patch()
 
-
-class TaskRunner:
-    def __init__(self, task):
-        self.__task = task
-
-    def run_task_in_thread(self):
-        with ThreadPoolExecutor(max_workers=1) as executor:
-            future = executor.submit(self.__task)
-            _ = future.result()
 
 task_runner = TaskRunner(task)
