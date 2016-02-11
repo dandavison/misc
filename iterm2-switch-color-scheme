@@ -15,8 +15,17 @@ UP = 'k'
 RIGHT = 'l'
 
 
+def error(msg):
+    print >>sys.stderr, msg
+    exit(1)
+
+
 def warn(msg):
     print >>sys.stderr, msg
+
+
+if os.getenv('TMUX'):
+    error("Please detach from your tmux session before running this script.")
 
 
 # https://github.com/mbadolato/iTerm2-Color-Schemes
