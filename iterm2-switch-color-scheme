@@ -1,21 +1,10 @@
 #!/usr/bin/env python
 import os
+import random
 import subprocess
 import sys
 import termios
 import tty
-
-# TODO: arrow keys
-# UP = '\x1b[A'
-# LEFT = '\x1b[D'
-# RIGHT = '\x1b[C'
-# DOWN = '\x1b[B'
-
-LEFT = 'h'
-DOWN = 'j'
-UP = 'k'
-RIGHT = 'l'
-
 
 def error(msg):
     print >>sys.stderr, msg
@@ -26,30 +15,58 @@ def warn(msg):
     print >>sys.stderr, msg
 
 
-if os.getenv('TMUX'):
-    error("Please detach from your tmux session before running this script.")
+class ColorSchemeChooser(object):
+    # TODO: arrow keys
+    # UP = '\x1b[A'
+    # LEFT = '\x1b[D'
+    # RIGHT = '\x1b[C'
+    # DOWN = '\x1b[B'
 
+    DOWN = 'j'
+    UP = 'k'
 
-def fetch_iterm2_color_schemes_if_absent():
-    # https://github.com/mbadolato/iTerm2-Color-Schemes
-    iterm2_color_schemes_dir = '/tmp/iTerm2-Color-Schemes'
-    if not os.path.exists(iterm2_color_schemes_dir):
-        warn('Cloning iTerm2-Color-Schemes into %s' % iterm2_color_schemes_dir)
-        subprocess.check_call(['git',
-                               'clone',
-                               'https://github.com/mbadolato/iTerm2-Color-Schemes.git',
-                               iterm2_color_schemes_dir])
-    return iterm2_color_schemes_dir
+    def __init__(self, path='/tmp/iTerm2-Color-Schemes'):
+        self.path = path
+        self.schemes_dir = self.path + '/schemes'
+        self.schemes = os.listdir(self.schemes_dir)
+        self.apply_script = self.path + '/tools/preview.rb'
 
+        if not os.path.exists(self.path):
+            warn('Cloning iTerm2-Color-Schemes into %s' % self.path)
+            self.clone_color_schemes_repo()
 
-ITERM2_COLOR_SCHEMES_DIR = fetch_iterm2_color_schemes_if_absent()
-SCHEMES_DIR = ITERM2_COLOR_SCHEMES_DIR + '/schemes'
-SCHEMES = os.listdir(SCHEMES_DIR)
-APPLY_SCRIPT = ITERM2_COLOR_SCHEMES_DIR + '/tools/preview.rb'
+    def run(self):
 
+        print 'j/k to move through color themes'
 
-def apply_color_scheme(scheme):
-    subprocess.check_call([APPLY_SCRIPT, SCHEMES_DIR + '/' + scheme])
+        i = random.choice(range(len(self.schemes)))
+        while True:
+            key = read_character()
+            if key == self.UP:
+                i -= 1
+            elif key == self.DOWN:
+                i += 1
+            else:
+                exit(0)
+            i = i % len(self.schemes)
+            self.apply_scheme(i)
+
+    def apply_scheme(self, i):
+        scheme = self.schemes[i]
+        sys.stdout.write("\r%3d %s\r" % (i, scheme.split('.')[0]))
+        subprocess.check_call([
+            self.apply_script,
+            self.schemes_dir + '/' + scheme,
+        ])
+
+    def clone_color_schemes_repo():
+        # https://github.com/mbadolato/iTerm2-Color-Schemes
+        subprocess.check_call([
+            'git',
+            'clone',
+            'https://github.com/mbadolato/iTerm2-Color-Schemes.git',
+            iterm2_color_schemes_dir,
+        ])
 
 
 def read_character():
@@ -68,17 +85,7 @@ def read_character():
 
 if __name__ == '__main__':
 
-    print 'Use j/k to move through color themes'
+    if os.getenv('TMUX'):
+        error("Please detach from your tmux session before running this script.")
 
-    i = 0
-    while True:
-        key = read_character()
-        if key in {LEFT, UP}:
-            i -= 1
-        elif key in {RIGHT, DOWN}:
-            i += 1
-        else:
-            exit(0)
-        scheme = SCHEMES[i]
-        print i, scheme.split('.')[0]
-        apply_color_scheme(scheme)
+    ColorSchemeChooser().run()
