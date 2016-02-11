@@ -15,6 +15,11 @@ UP = 'k'
 RIGHT = 'l'
 
 
+ITERM2_COLOR_SCHEMES_DIR = '/tmp/iTerm2-Color-Schemes'
+SCHEMES_DIR = ITERM2_COLOR_SCHEMES_DIR + '/schemes'
+SCHEMES = os.listdir(SCHEMES_DIR)
+APPLY_SCRIPT = ITERM2_COLOR_SCHEMES_DIR + '/tools/preview.rb'
+
 def error(msg):
     print >>sys.stderr, msg
     exit(1)
@@ -26,20 +31,6 @@ def warn(msg):
 
 if os.getenv('TMUX'):
     error("Please detach from your tmux session before running this script.")
-
-
-# https://github.com/mbadolato/iTerm2-Color-Schemes
-ITERM2_COLOR_SCHEMES_DIR = '/tmp/iTerm2-Color-Schemes'
-if not os.path.exists(ITERM2_COLOR_SCHEMES_DIR):
-    warn('Cloning iTerm2-Color-Schemes into %s' % ITERM2_COLOR_SCHEMES_DIR)
-    subprocess.check_call(['git',
-                           'clone',
-                           'https://github.com/mbadolato/iTerm2-Color-Schemes.git',
-                           ITERM2_COLOR_SCHEMES_DIR])
-
-SCHEMES_DIR = ITERM2_COLOR_SCHEMES_DIR + '/schemes'
-SCHEMES = os.listdir(SCHEMES_DIR)
-APPLY_SCRIPT = ITERM2_COLOR_SCHEMES_DIR + '/tools/preview.rb'
 
 
 class Getch(object):
@@ -67,15 +58,28 @@ getch = Getch()
 def apply_color_scheme(scheme):
     subprocess.check_call([APPLY_SCRIPT, SCHEMES_DIR + '/' + scheme])
 
-i = 0
-while True:
-    key = getch()
-    if key in {LEFT, UP}:
-        i -= 1
-    elif key in {RIGHT, DOWN}:
-        i += 1
-    else:
-        exit(0)
-    scheme = SCHEMES[i]
-    print i, scheme.split('.')[0]
-    apply_color_scheme(scheme)
+def fetch_iterm2_color_schemes_if_absent():
+    # https://github.com/mbadolato/iTerm2-Color-Schemes
+    if not os.path.exists(ITERM2_COLOR_SCHEMES_DIR):
+        warn('Cloning iTerm2-Color-Schemes into %s' % ITERM2_COLOR_SCHEMES_DIR)
+        subprocess.check_call(['git',
+                               'clone',
+                               'https://github.com/mbadolato/iTerm2-Color-Schemes.git',
+                               ITERM2_COLOR_SCHEMES_DIR])
+
+
+if __name__ == '__main__':
+    fetch_iterm2_color_schemes_if_absent()
+
+    i = 0
+    while True:
+        key = getch()
+        if key in {LEFT, UP}:
+            i -= 1
+        elif key in {RIGHT, DOWN}:
+            i += 1
+        else:
+            exit(0)
+        scheme = SCHEMES[i]
+        print i, scheme.split('.')[0]
+        apply_color_scheme(scheme)
