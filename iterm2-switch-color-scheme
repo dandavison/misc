@@ -22,8 +22,8 @@ class ColorSchemeChooser(object):
     # RIGHT = '\x1b[C'
     # DOWN = '\x1b[B'
 
-    DOWN = 'j'
-    UP = 'k'
+    NEXT = {'j'}
+    PREV = {'k'}
 
     def __init__(self, path='/tmp/iTerm2-Color-Schemes'):
         self.path = path
@@ -43,10 +43,10 @@ class ColorSchemeChooser(object):
         i = random.choice(range(len(self.schemes)))
         while True:
             key = read_character()
-            if key == self.UP:
-                i = (i - 1) % len(self.schemes)
-            elif key == self.DOWN:
+            if key in self.DOWN:
                 i = (i + 1) % len(self.schemes)
+            elif key in self.UP:
+                i = (i - 1) % len(self.schemes)
             else:
                 print
                 exit(0)
