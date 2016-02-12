@@ -47,6 +47,7 @@ class ColorSchemeChooser(object):
             elif key == self.DOWN:
                 i = (i + 1) % len(self.schemes)
             else:
+                print
                 exit(0)
             self.apply_scheme(i)
 
