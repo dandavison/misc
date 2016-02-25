@@ -41,31 +41,50 @@ if False:
 
 from select import select
 from sys import stdin
+import sys
+import tty
+import termios
 
 
 def getch_non_blocking():
-    if select([stdin], [], [])[0]:
-        return getch()
+    ready = select([stdin], [], [], 0)[0]
+    if ready:
+        return ready[0].read(1)
+
+
+def getch_non_blocking_2():
+    fd = stdin.fileno()
+    old = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        if select([stdin], [], [], 0)[0]:
+            char = stdin.read(1)
+            return char
+        else:
+            return None
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
 
 
 def read():
     buf = []
-    for char in getch_non_blocking():
-        if char:
+    while True:
+        char = getch_non_blocking()
+        print [char]
+        if char is not None:
             buf.append(char)
         else:
             if buf:
-                yield ''.join(buf)
+                yield buf
                 buf = []
             sleep(0.1)
 
 
 if __name__ == '__main__':
-    for chars in read():
-        print chars
-    # while True:
-    #     char = getch_non_blocking()
-    #     if char:
-    #         print char
-    #     else:
-    #         sleep(0.1)
+    # for chars in read():
+    #     print chars
+    while True:
+        char = getch_non_blocking()
+        print [char]
+        sleep(0.1)
