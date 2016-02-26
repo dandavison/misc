@@ -10,6 +10,11 @@ import tty
 
 POLL_INTERVAL = 0.1
 
+CTRL_C = '\x03'
+LEFT = '\x1b[D'
+RIGHT = '\x1b[C'
+UP = '\x1b[A'
+DOWN = '\x1b[B'
 
 def setNonBlocking(fd):
     """
