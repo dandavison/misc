@@ -32,9 +32,12 @@ def getchs():
     try:
         tty.setraw(fd)
         data = ''
-        while select([fd], [], [], 0)[0]:
-            data += sys.stdin.read(1)
-        return data
+        while True:
+            while select([fd], [], [], 0)[0]:
+                data += sys.stdin.read()
+            if data:
+                return data
+            sleep(0.1)
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
