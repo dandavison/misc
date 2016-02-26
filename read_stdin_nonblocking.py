@@ -2,17 +2,24 @@
 from time import sleep
 from select import select
 import sys
+import tty
+import termios
 
-from getch import getch
 from twisted.internet.fdesc import setNonBlocking
 
 
-setNonBlocking(sys.stdin.fileno())
+fd = sys.stdin.fileno()
+setNonBlocking(fd)
+old = termios.tcgetattr(fd)
 
-while True:
-    ready = select([sys.stdin], [], [], 0)[0]
-    if ready:
-        print [getch()]
-    else:
-        print '.'
-        sleep(1)
+try:
+    tty.setraw(fd)
+    while True:
+        ready = select([fd], [], [], 0)[0]
+        if ready:
+            print [sys.stdin.read(1)]
+        else:
+            print '.'
+            sleep(1)
+finally:
+    termios.tcsetattr(fd, termios.TCSADRAIN, old)
