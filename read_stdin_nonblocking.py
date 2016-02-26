@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from time import sleep
 from select import select
+import fcntl
+import os
 import sys
 import tty
 import termios
@@ -18,19 +20,28 @@ def setNonBlocking(fd):
 
 
 
+def getchs():
+    """
+    Return all bytes available for reading on stdin, or None if there are none.
 
-fd = sys.stdin.fileno()
-setNonBlocking(fd)
-old = termios.tcgetattr(fd)
+    Adapted from getch() in https://github.com/joeyespo/py-getch.
+    """
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    setNonBlocking(fd)
+    try:
+        tty.setraw(fd)
+        data = ''
+        while select([fd], [], [], 0)[0]:
+            data += sys.stdin.read(1)
+        return data
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
-try:
-    tty.setraw(fd)
+
+if __name__ == '__main__':
+    from time import sleep
+
     while True:
-        ready = select([fd], [], [], 0)[0]
-        if ready:
-            print [sys.stdin.read(1)]
-        else:
-            print '.'
-            sleep(1)
-finally:
-    termios.tcsetattr(fd, termios.TCSADRAIN, old)
+        print '%r' % getchs()
+        sleep(0.5)
