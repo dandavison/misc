@@ -19,10 +19,9 @@ def setNonBlocking(fd):
     fcntl.fcntl(fd, fcntl.F_SETFL, flags)
 
 
-
 def getchs():
     """
-    Return all bytes available for reading on stdin, or None if there are none.
+    Block until there are bytes to read on stdin and then return them all.
 
     Adapted from getch() in https://github.com/joeyespo/py-getch.
     """
@@ -31,20 +30,13 @@ def getchs():
     setNonBlocking(fd)
     try:
         tty.setraw(fd)
-        data = ''
-        while True:
-            while select([fd], [], [], 0)[0]:
-                data += sys.stdin.read()
-            if data:
-                return data
+        while not select([fd], [], [], 0)[0]:
             sleep(0.1)
+        return sys.stdin.read()
     finally:
         termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
 
 if __name__ == '__main__':
-    from time import sleep
-
     while True:
         print '%r' % getchs()
-        sleep(0.5)
