@@ -91,3 +91,19 @@ def paste(max_display_lines=5):
         formatted_code = formatted_code[:max_display_lines] + ['...']
     print '\n'.join(formatted_code)
     exec(code, globals())
+
+
+from collections import Counter
+from itertools import groupby
+from operator import itemgetter
+
+def counter_by(pairs):
+    """
+    `pairs` is [(a, b)]
+
+    Return counts of `b` values, grouped by `a`
+    """
+    return {
+        key: Counter(pair[1] for pair in pairs)
+        for key, pairs in groupby(sorted(pairs), lambda pair: pair[0])
+    }
