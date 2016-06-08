@@ -60,7 +60,43 @@ Each tuple is of the form
 So in that example return value, the first tuple shows that there are zero objects that are not-bird AND not-mammal, and the second shows that there is one object that is not-bird AND mammal.
 
 
-#### Example solution
+#### Example solutions
+
+##### Solution 1
+
+
+```python
+import itertools
+
+
+def classify_objects(objects, functions):
+    possible_answers = [(False, True) for f in functions]
+
+    all_row_answers = itertools.product(*possible_answers)
+
+    def negate(function):
+        return lambda obj: not function(obj)
+
+    def object_matches_this_row(obj, row_functions):
+        return all(f(obj) for f in row_functions)
+
+    rows = []
+    for row_answers in all_row_answers:
+
+        row_functions = [
+            function if answer else negate(function)
+            for function, answer in zip(functions, row_answers)
+        ]
+
+        count = sum(object_matches_this_row(obj, row_functions)
+                    for obj in objects)
+
+        rows.append(row_answers + (count,))
+
+    return rows
+```
+
+##### Solution 2
 
 ```python
 import itertools
@@ -78,11 +114,11 @@ class Question:
         )
 
 
-def classify_objects(objects, functions):
+def classify_objects_2(objects, functions):
     questions = [Question(f, True) for f in functions]
     negated_questions = [q.negated() for q in questions]
 
-    pairs_of_questions = zip(questions, negated_questions)
+    pairs_of_questions = zip(negated_questions, questions)
 
     all_row_questions = itertools.product(*pairs_of_questions)
 
