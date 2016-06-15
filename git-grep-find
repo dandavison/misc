@@ -1,0 +1,6 @@
+#!/bin/bash -e
+
+pattern=$1
+shift
+git --no-pager grep -niH --color=always --exclude-standard --no-index --full-name -e "$pattern" -- "$@"
+git ls | grep $pattern | sed 's/$/:1:/'
