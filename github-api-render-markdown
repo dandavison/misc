@@ -1,0 +1,18 @@
+#!/bin/bash -u
+
+password=$1
+
+# data='{"text": "Hello world github/linguist#1 **cool**, and #1!", "mode": "gfm", "context": "github/gollum"}'
+
+# data='{"text":"### A table\n \n| col1 | col2 |\n|------|------|\n|    1 |    2 |\n|    3 |    4 |\n \n### Some javascript\n \n```javascript\nreturn $.ajax({\ntype: \"POST\",\nurl: url,\ndata: JSON.stringify({text: markdown}),\ncontentType: \'application/json\',\ndataType: \'json\',\nbeforeSend: function (xhr) {\nxhr.setRequestHeader (\'Authorization\', \'Basic \' + btoa(username + \':\' + password));\n}\n});\n```\n \n[A link](https://jira.counsyl.com/secure/Dashboard.jspa).\n \nThat's it."}'
+
+# data='{"text":"### A table\n \n| col1 | col2 |\n|------|------|\n|    1 |    2 |\n|    3 |    4 |\n \n### Some javascript\n \n```var fun = function(x) { return undefined;}```\n \n[A link](https://jira.counsyl.com/secure/Dashboard.jspa).\n \nThats it."}'
+
+data='{"text":"### A table\n \n| col1 | col2 |\n|------|------|\n|    1 |    2 |\n|    3 |    4 |"}'
+
+data='{"text":"@dan code without language specifier\n```python\ndef foo():\nreturn None\n```\n@dan python code\ndef foo():\nreturn None\n@dan markdown code 1\n \n| col1 | col2 |\n|------|------|\n|    1 |    2 |\n|    3 |    4 |\n@dan markdown code 2\n \n### A table\n \n| col1 | col2 |\n|------|------|\n|    1 |    2 |\n|    3 |    4 |\n@dan markdown code 2\n \n### Some javascript\n \n```javascript\nreturn $.ajax({\ntype: \"POST\",\nurl: url,\ndata: JSON.stringify({text: markdown}),\ncontentType: 'application/json',\ndataType: 'json',\nbeforeSend: function (xhr) {\nxhr.setRequestHeader ('Authorization', 'Basic ' + btoa(username + ':' + password));\n}\n});\n```\n \n[A link](https://jira.counsyl.com/secure/Dashboard.jspa).\n \nThat's it."}'
+
+curl -X POST \
+    -d "$data" \
+    -H "Content-Type: application/json" \
+    "https://dan:${password}@github.counsyl.com/api/v3/markdown"

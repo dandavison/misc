@@ -3,9 +3,13 @@ def format_sql(sql):
     return sqlparse.format(unicode(sql), reindent=True)
 
 
+def format_queryset_sql(qs):
+    return format_sql(qs.values_list('pk').query)
+
+
 def format_markdown_table_from_counts(counts):
-    table = '| %s | count |\n' % (' | '.join('val_%d' % i
-                                             for i, key in enumerate(counts.keys()[0])))
+    table = '| %s | count |\n' % (
+        ' | '.join('val_%d' % i for i, key in enumerate(counts.keys()[0])))
     table += '|%s|---|\n' % '|'.join('---' for _ in counts.keys()[0])
     for val, cnt in counts.most_common():
         table += '| %s | %d |\n' % (' | '.join(val), cnt)
@@ -13,8 +17,10 @@ def format_markdown_table_from_counts(counts):
 
 
 def format_markdown_table(rows, columns=None):
+
     def format_row(row):
         return '|%s|' % '|'.join(map(str, row))
+
     def format_hline(row):
         return '|%s---|' % '---|'.join('' for _ in row)
 
@@ -28,11 +34,13 @@ def format_markdown_table(rows, columns=None):
     return '\n'.join(table)
 
 
-
 def git_dir():
     """
     Base dir of current git repo
     """
+    import os
+    import subprocess
+
     stdout, stderr = (subprocess
                       .Popen('git rev-parse --git-dir'.split(' '),
                              stdout=subprocess.PIPE,
@@ -45,7 +53,11 @@ def git_dir():
     return os.path.dirname(stdout)
 
 
-def classification_metrics(n_true_neg=None, n_true_pos=None, ppv=None, npv=None):
+def classification_metrics(n_true_neg=None,
+                           n_true_pos=None,
+                           ppv=None,
+                           npv=None):
+
     TP = int(ppv * n_true_pos)
     FN = n_true_pos - TP
     TN = int(npv * n_true_neg)
@@ -66,13 +78,13 @@ def classification_metrics(n_true_neg=None, n_true_pos=None, ppv=None, npv=None)
     }
 
 
-from itertools import starmap
-
 def make_df(rows):
     """
     rows: list-of-list-of-key-value-pairs
     """
+    from itertools import starmap
     import pandas
+
     column_labels, rows = zip(*list(starmap(zip, rows)))
     [column_labels] = set(column_labels)
     return pandas.DataFrame.from_records(
@@ -81,11 +93,12 @@ def make_df(rows):
         index=column_labels[0])
 
 
-import subprocess
-from textwrap import dedent
-
 def paste(max_display_lines=5):
-    code = dedent(subprocess.check_output(["reattach-to-user-namespace", "pbpaste"]))
+    import subprocess
+    from textwrap import dedent
+
+    code = dedent(subprocess
+                  .check_output(["reattach-to-user-namespace", "pbpaste"]))
     formatted_code = code.splitlines()
     if len(formatted_code) > max_display_lines:
         formatted_code = formatted_code[:max_display_lines] + ['...']
@@ -93,17 +106,30 @@ def paste(max_display_lines=5):
     exec(code, globals())
 
 
-from collections import Counter
-from itertools import groupby
-from operator import itemgetter
-
 def counter_by(pairs):
     """
     `pairs` is [(a, b)]
 
     Return counts of `b` values, grouped by `a`
     """
+    from collections import Counter
+    from itertools import groupby
+
     return {
         key: Counter(pair[1] for pair in pairs)
+        for key, pairs in groupby(sorted(pairs), lambda pair: pair[0])
+    }
+
+
+def group_by(pairs):
+    """
+    `pairs` is [(a, b)]
+
+    Return sorted lists of `b` values, grouped by `a`
+    """
+    from itertools import groupby
+
+    return {
+        key: sorted(pair[1] for pair in pairs)
         for key, pairs in groupby(sorted(pairs), lambda pair: pair[0])
     }
