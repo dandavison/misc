@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# List branches in reverse chronological order.
+
+# Usage: "git-branch-by-date [ -r ]"
+
+# By default local branches are listed and the committer name is ommitted
+# -r : list remote branches with committer name
+
+# E.g.
+
+# git branch-by-date -r
+
+# master                                                aziz                     22 hours ago
+# HEAD                                                  aziz                     22 hours ago
+# branch1                                               aziz                     22 hours ago
+# branch2                                               bob                      22 hours ago
+# branch3                                               clyde                    22 hours ago
+# branch4                                               clyde                    23 hours ago
+
+# Add as git subcommand:
+# git config --global alias.branch-by-date '!/path/to/this/file'
+
+flag="$1"
+
+if [ -n "$flag" ] ; then
+    if [ "$flag" = "-r" ] ; then
+	refs=refs/remotes/origin/
+	format='%(refname),%(committername),%(committerdate:relative)'
+    else
+	echo "$(basename $0) [ -r ]" 1>&2
+	exit 1
+    fi
+else
+    refs=refs/heads/
+    format='%(refname),%(committerdate:relative)'
+fi
+
+git for-each-ref --sort=-committerdate "$refs" --format="$format" | sed "s,^$refs,," | column -t -s',' | less -X
