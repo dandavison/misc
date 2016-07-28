@@ -13,5 +13,4 @@ class Child(Mixin, Parent):
     def __init__(self):
         super(Child, self).__init__()
 
-Child()
-
+print Child.mro()
