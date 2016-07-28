@@ -9,12 +9,9 @@ class Mixin(object):
         print 'Mixin.__init__'
         super(Mixin, self).__init__()
 
-class Child1(Mixin, Parent):
-    pass
-
-class Child2(Mixin, Parent):
+class Child(Mixin, Parent):
     def __init__(self):
-        super(Child2, self).__init__()
+        super(Child, self).__init__()
 
-Child1()
-Child2()
+Child()
+
