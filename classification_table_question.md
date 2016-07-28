@@ -84,4 +84,14 @@ def classify_objects(objects, functions):
         rows.append(row_answers + (count,))
 
     return rows
+
+
+class ObjectClassifier:
+
+    def __init__(self, functions):
+        self.functions = functions
+
+    def classify(self, objects):
+        # ...
+
 ```
