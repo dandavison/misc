@@ -10,10 +10,15 @@ import sys
 
 READ_END, WRITE_END = 0, 1
 
+# It seems that it also works to defer pipe creation to the child1 process as
+# below
 pipe = os.pipe()
 
 if os.fork() == 0:
     # In Child 1
+
+    # pipe = os.pipe()
+
     if os.fork() > 0:
         # In Child 1
         # Send output to write end of pipe
