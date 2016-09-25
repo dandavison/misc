@@ -43,7 +43,21 @@ def A_power(v, n):
     # 1. Convert v to eigenbasis
     # 2. Compute power in eigenbasis
     # 3. convert back
-    return cob * (A_star ** n) * cob_inv * v
+
+    tmp = cob_inv * v
+
+    tmp = ((tmp.A1 * np.diag(A_star) ** n)
+           .reshape((2,1)))
+
+    ans = cob * tmp
+
+    # Computation is equivalent to the following, but this is potentially
+    # inefficient as the matrix power operation does not use the fact that
+    # A_star is diagonal.
+    assert equal(ans,
+                 cob * (A_star ** n) * cob_inv * v)
+
+    return ans
 
 
 v = np.matrix([[3, 2]]).T
