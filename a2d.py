@@ -12,14 +12,11 @@ def d2a(d):
 
 
 def i2n(i, n):
-    assert n <= 10
-    if not i:
-        return '0'
     j = []
     while i:
         i, _j = divmod(i, n)
         j.append(_j)
-    return ''.join(map(str, reversed(j)))
+    return ''.join(map(str, reversed(j or [0])))
 
 
 def a2d(py):
