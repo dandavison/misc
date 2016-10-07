@@ -10,14 +10,14 @@ def d2a(d):
 
 
 def i2n(i, n):
-    from math import ceil, log
-    k = int(ceil(log(i + 1, n)) + 1)
+    assert n <= 10
+    if not i:
+        return '0'
     j = []
-    while k + 1:
-        _j, i = divmod(i, n ** k)
+    while i:
+        i, _j = divmod(i, n)
         j.append(_j)
-        k -= 1
-    return str(int(''.join(map(str, j))))
+    return ''.join(map(str, reversed(j)))
 
 
 def a2d(py):
