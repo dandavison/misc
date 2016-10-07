@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 def d2a(d):
     ab = [2**6 + i for i in [1, 3, 7, 20]]
     w = []
@@ -27,3 +29,27 @@ def a2d(py):
         for i in b3:
             yield chr(ab[i])
         yield chr(ab[3])
+
+
+T = '''
+import d2a
+exec ''.join(d2a("""
+%s
+""".strip()))
+'''.lstrip()
+
+
+if __name__ == '__main__':
+    import sys
+    m, f = sys.argv[1:]
+
+    if m == 'o':
+        with open(f) as fi:
+            a = fi.read()
+            if not a.strip():
+                sys.exit(0)
+        with open(f, 'w') as fo:
+            fo.write(T % ''.join(a2d(a)))
+    elif m == 'i':
+        with open(f) as fi:
+            sys.stdout.write(''.join(d2a(fi.read())))
