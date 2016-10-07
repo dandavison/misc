@@ -36,6 +36,13 @@ exec ''.join(d2a("""
 '''.lstrip()
 
 
+def formatted(s):
+    from more_itertools import chunked
+    for chunk in chunked(s, 79):
+        yield ''.join(chunk)
+        yield '\n'
+
+
 if __name__ == '__main__':
     import sys
     m, f = sys.argv[1:]
@@ -46,7 +53,7 @@ if __name__ == '__main__':
             if not a.strip():
                 sys.exit(0)
         with open(f, 'w') as fo:
-            fo.write(T % ''.join(a2d(a)))
+            fo.write(T % formatted(''.join(a2d(a))))
     elif m == 'i':
         with open(f) as fi:
             sys.stdout.write(''.join(d2a(fi.read())))
