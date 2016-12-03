@@ -1,0 +1,1 @@
+find * -type f -exec bash -c 'printf "$1	$(md5 -q "$1")\n"' -- {} \;
