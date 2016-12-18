@@ -1,5 +1,8 @@
+#!/usr/bin/env python
+
 import hashlib
 import os
+from pipes import quote
 
 import dirtools
 
@@ -18,7 +21,7 @@ def sync_dirs(dir_1, dir_2):
     }
 
     for path in sorted(in_source_but_not_target):
-        print 'cp ' + path + ' ' + dir_2
+        print "cp -r %s %s" % (quote(path), quote(dir_2))
 
 
 def _get_content_to_paths(dir_path):
