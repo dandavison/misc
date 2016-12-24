@@ -135,9 +135,19 @@ def group_by(pairs):
     }
 
 
-def print_dict(d):
+def pretty_print(obj):
+    if isinstance(obj, dict):
+        pretty_print_dict(obj)
+    elif hasattr(obj, '__iter__'):
+        for item in sorted(obj):
+            pretty_print(obj)
+    else:
+        print(obj)
+
+
+def pretty_print_dict(d):
     for item in sorted(d.items()):
-        print '%-30s %s' % (item)
+        print '%-60s %s' % (item)
 
 
 def format_sql(sql):
@@ -242,6 +252,12 @@ def open_as_html(string):
 
 def get_enum_map(enum):
     return {i: v.name for i, v in enumerate(enum)}
+
+
+def venn(s1, s2):
+    s1 = set(s1)
+    s2 = set(s2)
+    return s1, s1 - s2, s1 & s2, s2 - s1, s2
 
 
 # Recursive defaultdict

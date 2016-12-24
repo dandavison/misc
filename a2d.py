@@ -29,10 +29,10 @@ def a2d(py):
 
 
 T = '''
-import d2a
-exec ''.join(d2a("""
+from counsyl.product.common.utils.a2d import d2a
+exec d2a("""
 %s
-""".strip()))
+""")
 '''.lstrip()
 
 
@@ -53,7 +53,7 @@ if __name__ == '__main__':
             if not a.strip():
                 sys.exit(0)
         with open(f, 'w') as fo:
-            fo.write(T % formatted(''.join(a2d(a))))
+            fo.write(T % ''.join(formatted(a2d(a))).strip())
     elif m == 'i':
         with open(f) as fi:
             sys.stdout.write(''.join(d2a(fi.read())))

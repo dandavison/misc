@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import logging
 import sys
 from time import sleep
 from multiprocessing.dummy import Pool as ThreadPool

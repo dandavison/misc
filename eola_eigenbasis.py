@@ -64,3 +64,15 @@ v = np.matrix([[3, 2]]).T
 n = 17
 
 assert equal(A_power(v, n), (A ** n) * v)
+
+
+from math import sqrt
+
+def fib(n):
+    return (
+        ((1 + sqrt(5)) ** n - (1 - sqrt(5)) ** n)
+        /
+        float(2**n * sqrt(5)))
+
+for i in range(10):
+    print i, fib(i)
