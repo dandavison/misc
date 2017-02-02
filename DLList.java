@@ -6,7 +6,7 @@ class _DLList<T> {
         private Node prev;
     }
 
-    private Node first;
+    private Node first, last;
     private int size = 0;
 
     public void addFirst(T value) {
@@ -17,6 +17,23 @@ class _DLList<T> {
             first.prev = node;
         }
         first = node;
+        if(last == null) {
+            last = first;
+        }
+        size++;
+    }
+
+    public void addLast(T value) {
+        Node node = new Node();
+        node.value = value;
+        node.prev = last;
+        if(last != null) {
+            last.next = node;
+        }
+        last = node;
+        if(first == null) {
+            first = last;
+        }
         size++;
     }
 
@@ -39,8 +56,9 @@ class _DLList<T> {
 public class DLList {
     public static void main(String[] args) {
         _DLList<String> l = new _DLList<>();
-        l.addFirst("fish");
         l.addFirst("bird");
+        l.addFirst("fish");
+        l.addLast("mammal");
         l.print();
     }
 }
