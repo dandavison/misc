@@ -1,4 +1,9 @@
 class MinHeap(object):
+    """
+    Child nodes of item i are at 2i + 1 and 2i + 2.
+    Parent node of item i is at (i - 1) / 2
+    See _get_children_indexes() and _get_parent_index()
+    """
 
     def __init__(self, values, verbose=False):
         self._verbose = verbose
