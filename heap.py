@@ -5,8 +5,7 @@ class MinHeap(object):
     See _get_children_indexes() and _get_parent_index()
     """
 
-    def __init__(self, values, verbose=False):
-        self._verbose = verbose
+    def __init__(self, values):
         self._heap = []
         for val in values:
             self.insert(val)
@@ -16,8 +15,6 @@ class MinHeap(object):
         return ''
 
     def insert(self, value):
-        if self._verbose:
-            print "insert(%s)" % value
         self._heap.append(value)
         self._bubble_up(len(self._heap) - 1)
         self.print_tree()
@@ -30,9 +27,6 @@ class MinHeap(object):
         last = self._heap.pop()
         if self._heap:
             self._heap[0] = last
-            if self._verbose:
-                print "Moved %s to first position" % last
-                self.print_tree()
             self._bubble_down(0)
         self.print_tree()
         return minimum
@@ -51,8 +45,6 @@ class MinHeap(object):
             parent_idx = self._get_parent_index(idx)
             if parent_idx is None:
                 return
-            if self._verbose:
-                print "bubble_up(%s, %s)" % (self._heap[idx], self._heap[parent_idx])
             if not self._heap[parent_idx] <= self._heap[idx]:
                 self._swap_values(idx, parent_idx)
                 idx = parent_idx
@@ -68,19 +60,13 @@ class MinHeap(object):
             if not children:
                 return
             min_child_val, min_child_idx = min(children)
-            if self._verbose:
-                print "bubble_down(%s, %s)" % (val, min_child_val)
             if not val <= min_child_val:
                 self._swap_values(idx, min_child_idx)
                 idx = min_child_idx
-                if self._verbose:
-                    self.print_tree()
             else:
                 return
 
     def _swap_values(self, idx1, idx2):
-        if self._verbose:
-            print "swap(%s, %s)" % (self._heap[idx1], self._heap[idx2])
         self._heap[idx1], self._heap[idx2] = self._heap[idx2], self._heap[idx1]
 
     def print_tree(self):
