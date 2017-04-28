@@ -150,6 +150,37 @@ def pretty_print_dict(d):
         print '%-60s %s' % (item)
 
 
+def print_tree(root):
+    # Hack: create tree of directories and use `tree` utility to draw tree.
+    import os
+    from tempfile import mkdtemp
+
+    def _make_directory_tree(node, root_dir):
+        if not isinstance(node, dict):
+            os.mkdir('%s/%s' % (root_dir, node))
+        else:
+            for key in node:
+                child_dir = '%s/%s' % (root_dir, key)
+                os.mkdir(child_dir)
+                _make_directory_tree(node[key], child_dir)
+
+    tempdir = mkdtemp()
+    root_dir = '%s/%s' % (tempdir, 'root')
+    os.mkdir(root_dir)
+    _make_directory_tree(root, root_dir)
+    with chdir(root_dir):
+        _ = os.system('tree --noreport')
+    os.system('rm -r %s' % tempdir)
+
+
+@contextmanager
+def chdir(to_dir):
+    from_dir = os.getcwd()
+    os.chdir(to_dir)
+    yield
+    os.chdir(from_dir)
+
+
 def format_sql(sql):
     import sqlparse
     return sqlparse.format(unicode(sql), reindent=True)
