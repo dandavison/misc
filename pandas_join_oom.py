@@ -40,8 +40,8 @@ def possible_parents_of_2_plus_0_child():
 
 
 def all_likelihood_surfaces():
-    P_snp_given_cn = list(product([0.1 * i for i in range(1, 10)],
-                                  [0.1 * i for i in range(1, 10)],
+    P_snp_given_cn = list(product([0 * i for i in range(1, 10)],
+                                  [0 * i for i in range(1, 10)],
                                   [0 * i for i in range(1, 10)]))
 
     surfaces = None
