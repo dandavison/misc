@@ -1,20 +1,15 @@
 from collections import namedtuple
 
-from pandas import *
+import pandas as pd
 
 
-def iternamedtuples1(df):
+def iternamedtuples(df):
     Row = namedtuple('Row', df.columns)
     for row in df.itertuples():
         yield Row(*row[1:])
 
 
-def iternamedtuples2(df=DataFrame()):
-    Row = namedtuple('Row', df.columns)
-    for row in df.itertuples():
-        yield Row(*row[1:])
-
-
-if __name__ == '__main__':
-    print list(iternamedtuples1(DataFrame()))
-    print list(iternamedtuples2())
+def df_to_array(df):
+    assert isinstance(df.index, pd.MultiIndex)
+    shape = tuple(map(len, df.index.levels)) + (len(df.columns),)
+    return df.values.reshape(shape)

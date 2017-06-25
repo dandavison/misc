@@ -47,7 +47,7 @@ def all_likelihood_surfaces():
     surfaces = None
     for parents in sorted(possible_parents_of_2_positive_child()):
         print(parents)
-        trio = parents + ((2, 1),)
+        trio = 'key'
         try:
             surface = pd.DataFrame({trio: [0] * len(P_snp_given_cn)}, index=P_snp_given_cn)
         except Exception as ex:

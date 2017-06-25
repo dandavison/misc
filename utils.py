@@ -150,9 +150,10 @@ def pretty_print_dict(d):
         print '%-60s %s' % (item)
 
 
-def print_tree(root):
+def format_tree(root):
     # Hack: create tree of directories and use `tree` utility to draw tree.
     import os
+    import subprocess
     from tempfile import mkdtemp
 
     def _make_directory_tree(node, root_dir):
@@ -169,12 +170,19 @@ def print_tree(root):
     os.mkdir(root_dir)
     _make_directory_tree(root, root_dir)
     with chdir(root_dir):
-        _ = os.system('tree --noreport')
-    os.system('rm -r %s' % tempdir)
+       tree = subprocess.check_output(['tree', '--noreport'])
+    subprocess.check_call(['rm', '-r', tempdir])
+    return tree
 
 
+def print_tree(root):
+    print(format_tree(root))
+
+
+from contextlib import contextmanager
 @contextmanager
 def chdir(to_dir):
+    import os
     from_dir = os.getcwd()
     os.chdir(to_dir)
     yield
@@ -340,3 +348,22 @@ def paste(max_display_lines=5):
         formatted_code = formatted_code[:max_display_lines] + ['...']
     print '\n'.join(formatted_code)
     exec(code, globals())
+
+def bits(x):
+    bits = bin(x)[2:]
+    return ' '.join(''.join(nib) for nib in chunked(bits, 4))
+
+
+def parse_mips_instruction_16(instr):
+    opcode, rd, rs, rt, funct = instr[:4], instr[5:8], instr[8:11], instr[11]
+def histogram_datetimes(dtimes, **kwargs):
+    import datetime
+    import numpy as np
+
+    to_timestamp = np.vectorize(lambda x: (x - datetime.datetime(1970, 1, 1)).total_seconds())
+    from_timestamp = np.vectorize(lambda x: datetime.datetime.utcfromtimestamp(x))
+
+    hist, bin_edges = np.histogram(to_timestamp(dtimes), **kwargs)
+
+    for count, dt in zip(hist, from_timestamp(bin_edges)):
+        print('%-20s %d' % (dt.strftime('%Y-%m-%d'), count))

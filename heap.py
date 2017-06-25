@@ -17,7 +17,6 @@ class MinHeap(object):
     def insert(self, value):
         self._heap.append(value)
         self._bubble_up(len(self._heap) - 1)
-        self.print_tree()
 
     def find_minimum(self):
         return self._heap[0]
@@ -28,7 +27,6 @@ class MinHeap(object):
         if self._heap:
             self._heap[0] = last
             self._bubble_down(0)
-        self.print_tree()
         return minimum
 
     def _get_children_indexes(self, idx):
@@ -92,3 +90,11 @@ class MinHeap(object):
             child_dir = '%s/%s' % (root_dir, self._heap[child_idx])
             os.mkdir(child_dir)
             self._make_directory_tree(child_idx, child_dir)
+
+
+if __name__ == '__main__':
+    h = MinHeap([])
+    for i in [3, 1, 5, 2, 4, 0.5]:
+        print('insert %d' % i)
+        h.insert(i)
+        print(h._heap)

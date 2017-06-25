@@ -14,8 +14,9 @@ void link_nodes(std::vector<Element> *elements) {
 
     elements->push_back(element);
 
-    cout << "address of elements[0] is " << &elements[0] << endl;
+    cout << "address of elements[i] is " << &elements[0] << endl;
 }
+
 
 int main() {
   std::vector<Element> elements;
@@ -23,6 +24,8 @@ int main() {
   cout << "hello" << endl;
 
   link_nodes(&elements);
+  link_nodes(&elements);
 
   cout << "address of elements[0] is " << &elements[0] << endl;
+  cout << "address of elements[1] is " << &elements[1] << endl;
 }
