@@ -46,6 +46,82 @@ def highest_density_interval(x, y, p_area=0.95, **kwargs):
 
 
 class TestHighestDensityInterval(unittest.TestCase):
+    """
+    Test interval calculation for some functions for which we can construct and
+    invert the cumulative area function.
+    """
+
+    def test_triangle(self):
+        """
+        Test interval calculation under an asymmetric triangle.
+
+        The triangle has bottom left corner at (0, 0), and bottom right corner
+        at (0, base).
+        """
+        theta1, theta2 = np.pi / 3, np.pi / 5
+        tan_theta1, tan_theta2 = np.tan(theta1), np.tan(theta2)
+        base = 1
+        p_area = 0.95  # desired proportion of area
+
+        # The x-coordinate of the tip of the triangle is determined by the
+        # relative magnitudes of the two gradients.
+        rho = tan_theta2 / (tan_theta1 + tan_theta2)
+        x_tip = base * rho
+
+        # Total area of triangle
+        total_area = (
+            1/2 * tan_theta1 * x_tip ** 2 +         # to the left of x_tip
+            1/2 * tan_theta2 * (base - x_tip) ** 2  # to the right of x_tip
+        )
+
+        # For all x \in (0, base), find the x for which: an interval of area
+        # p_area starting at x is the narrowest of all such intervals.
+
+
+        # Proof sketch:
+
+        # 1. Integrate the triangle function to form a cumulative area
+        #    function F(x)
+
+        # 2. Use the inverse of F to form a function W(a) giving the width
+        #    (along the x coordinate) of an interval of area total_area *
+        #    p_area, given that the interval starts at cumulative area a.
+
+        # 3. Find the a that minimizes W by differentiating W. The result is
+        #    intuitive: again it depends on the relative magnitude rho of the
+        #    two gradients.
+
+        expected_left_bound_area = rho * (1 - p_area) * total_area
+        expected_right_bound_area = (expected_left_bound_area +
+                                     p_area * total_area)
+
+        def f(x):
+            if x <= x_tip:
+                return x * tan_theta1
+            else:
+                return (base - x) * tan_theta2
+
+        def F(x):
+            if x <= x_tip:
+                return 1/2 * tan_theta1 * x ** 2
+            else:
+                return total_area - 1/2 * tan_theta2 * (base - x) ** 2
+
+        def Finv(a):
+            if a <= F(x_tip):
+                return np.sqrt(2 * a / tan_theta1)
+            else:
+                return base - np.sqrt(2 * (total_area - a) / tan_theta2)
+
+        expected_left_bound = Finv(expected_left_bound_area)
+        expected_right_bound = Finv(expected_right_bound_area)
+
+        x = np.linspace(0, base, 1e6)
+        y = np.array(map(f, x))
+        left, right = highest_density_interval(x, y, p_area, xtol=1e-8, ftol=1e-8)
+
+        self.assertAlmostEqual(left, expected_left_bound)
+        self.assertAlmostEqual(right, expected_right_bound)
 
     def test_isosceles_triangle(self):
         """
@@ -110,7 +186,7 @@ class TestHighestDensityInterval(unittest.TestCase):
         self.assertAlmostEqual(right, expected_right_bound)
 
     def assertAlmostEqual(self, a, b):
-        eps = 1e-8
+        eps = 1e-6
         self.assertTrue(abs(a - b) < eps)
 
 
