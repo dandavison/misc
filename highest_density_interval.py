@@ -12,7 +12,11 @@ from scipy import stats
 
 def highest_density_interval(x, y, p_area=0.95, **kwargs):
     """
-    Return highest density interval with proportion p_area of area.
+    Return the highest density interval with proportion p_area of area.
+
+    The highest density intervals is, out of all intervals with proportion
+    p_area of area, the interval over which the average value of the function
+    is maximized.
 
     x and y are 1-dimensional arrays of the same length, specifying the value
     of the function y at grid points x. I.e. y[i] = f(x[i]), where f is the
