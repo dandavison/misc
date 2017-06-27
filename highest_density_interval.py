@@ -109,26 +109,6 @@ class TestHighestDensityInterval(unittest.TestCase):
         self.assertAlmostEqual(left, expected_left_bound)
         self.assertAlmostEqual(right, expected_right_bound)
 
-    def test_gamma(self):
-        "Test interval calculation under an asymmetric curve."
-        if True:
-            return
-        shape, loc, scale = 2, 0, 1
-        dist = stats.gamma(shape, loc=loc, scale=scale)
-        p_area = 0.95
-        tail_prob = (1 - p_area) / 2
-
-        expected_left_bound = dist.ppf(tail_prob)
-        expected_right_bound = dist.ppf(1 - tail_prob)
-
-        x = np.linspace(0, 40, 1e6)
-        y = dist.pdf(x)
-        tol = 1e-7
-        left, right = highest_density_interval(x, y, p_area, xtol=1e-6, ftol=1e-6)
-
-        self.assertAlmostEqual(left, expected_left_bound)
-        self.assertAlmostEqual(right, expected_right_bound)
-
     def assertAlmostEqual(self, a, b):
         eps = 1e-8
         self.assertTrue(abs(a - b) < eps)
