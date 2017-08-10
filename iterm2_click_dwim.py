@@ -71,7 +71,6 @@ def edit_file(path, line):
         '--eval', '(find-file "%s")' % path,
         '--eval', '(select-frame-set-input-focus (selected-frame))',
         '--eval', '(goto-line %d)' % line,
-        '--eval', '(dan/on-jump-into-buffer)',
     ]
     log(cmd)
     subprocess.check_call(cmd)
