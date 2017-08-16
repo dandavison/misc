@@ -8,7 +8,7 @@ import sys
 
 
 LOG = '/tmp/parse-python-traceback-file-position.log'
-EMACSCLIENT = os.path.expanduser('~/src/emacs-config/bin/emacsclient')
+EMACSCLIENT = '/usr/local/bin/emacsclient'
 
 
 def notify(message):
