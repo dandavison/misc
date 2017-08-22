@@ -1,0 +1,106 @@
+#!/usr/bin/env python
+from __future__ import print_function
+from __future__ import unicode_literals
+
+import itertools
+import os
+import warnings
+from operator import itemgetter
+
+import lxml.etree
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+
+def get_test_failures(build):
+    """
+    Return list of test failure dicts.
+    """
+    failures = []
+    for xml in _get_all_nosetest_xmls(build):
+        root = lxml.etree.fromstring(xml)
+        failures.extend(_get_failures(root))
+
+    return failures
+
+
+def print_test_failures(failures, output_format):
+    failures = sorted(failures, key=itemgetter('test'))
+    if output_format == 'json':
+        print(json.dumps(failures, sort_keys=True, indent=2))
+    elif output_format == 'org':
+        by_test_class = itertools.groupby(failures, itemgetter('test_class'))
+        for test_class, failures in by_test_class:
+            print('* ' + test_class)
+            for failure in failures:
+                print('** ' + failure['test'])
+                print(failure['traceback'])
+
+
+def _get_all_nosetest_xmls(build):
+    """
+    Generator yielding nosetest XML for all runs (until first 404 is encountered).
+    """
+    url = "https://{user}:{password}@{host}/go/files/{build}/lengthy-tests/1/lengthy-runInstance-{run}/test-results/nosetests.xml"
+
+    context = {
+        'host': 'go-cd.counsyl.com',
+        'user': os.getenv('GOCD_USER'),
+        'password': os.getenv('GOCD_PASSWORD'),
+        'build': build,
+    }
+
+    assert context['user'], 'Missing environment variable GOCD_USER'
+    assert context['password'], 'Missing environment variable GOCD_PASSWORD'
+
+    run = 1
+    while True:
+        context['run'] = run
+        resp = requests.get(url.format(**context), verify=False)
+        if resp.status_code == 404:
+            assert run > 1, '404 for run 1: malformed URL?'
+            raise StopIteration
+        else:
+            resp.raise_for_status()
+            yield resp.content
+            print('{build}/lengthy-tests/1/lengthy-runInstance-{run}'.format(**context),
+                  file=sys.stderr)
+            run += 1
+
+
+def _get_failures(root):
+    """
+    Generator yielding a dict for each error element in the XML.
+    """
+    testsuite = root
+    for testcase in root.getchildren():
+        for error in testcase.findall('error'):
+            yield {
+                'test': testcase.attrib['name'],
+                'test_class': testcase.attrib['classname'],
+                'traceback': error.text,
+            }
+
+
+def usage():
+    print('example: GOCD_USER=my_username GOCD_PASSWORD=my_password %s dev-website-all-4/1584' %
+          os.path.basename(sys.argv[0]), file=sys.stderr)
+    exit(1)
+
+
+if __name__ == '__main__':
+    import sys
+
+    n_args = len(sys.argv[1:])
+
+    build = sys.argv[1]
+    if n_args == 1:
+        output_format = 'json'
+    elif n_args == 2:
+        output_format = sys.argv[2]
+
+    assert output_format in {'json', 'org'}
+
+    print_test_failures(get_test_failures(build), output_format)
