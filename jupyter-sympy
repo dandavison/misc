@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Prepare an existing python kernel for sympy work
+
+# from IPython import get_ipython
+# ipython = get_ipython
+# ipython.magic('pylab inline')
+
+jupyter-eval <<EOF
+%pylab inline
+from __future__ import division, print_function
+import sympy as sp
+from sympy import symbols
+from sympy.plotting import plot
+
+x, y, z, t, theta = symbols("x y t theta")
+EOF
