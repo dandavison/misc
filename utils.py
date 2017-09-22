@@ -387,3 +387,10 @@ def histogram_datetimes(dtimes, **kwargs):
 
     for count, dt in zip(hist, from_timestamp(bin_edges)):
         print('%-20s %d' % (dt.strftime('%Y-%m-%d'), count))
+
+
+def histogram(x, **kwargs):
+    import numpy as np
+    hist, bin_edges = np.histogram(x, **kwargs)
+    for count, val in zip(hist, bin_edges):
+        print('%-20s %d' % (val, count))
