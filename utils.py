@@ -7,6 +7,12 @@ def format_queryset_sql(qs):
     return format_sql(qs.values_list('pk').query)
 
 
+def execute_sql(sql):
+    c = connection.cursor()
+    c.execute(sql)
+    return c.fetchall()
+
+
 def format_markdown_table_from_counts(counts):
     table = '| %s | count |\n' % (
         ' | '.join('val_%d' % i for i, key in enumerate(counts.keys()[0])))
