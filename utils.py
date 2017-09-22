@@ -299,10 +299,24 @@ def get_enum_map(enum):
     return {i: v.name for i, v in enumerate(enum)}
 
 
-def venn(s1, s2):
-    s1 = set(s1)
-    s2 = set(s2)
-    return s1, s1 - s2, s1 & s2, s2 - s1, s2
+def venn(*sets):
+    from itertools import combinations
+    import numpy as np
+    import pandas as pd
+
+    n = len(sets)
+    venn =  (pd.DataFrame(np.zeros((n, n)),
+                          index=range(1, n+1),
+                          columns=range(1, n+1))
+             .astype(object))
+
+    for ((i, s_i), (j, s_j)) in combinations(enumerate(sets, 1), 2):
+        venn.ix[i, i] = len(s_i)
+        venn.ix[j, j] = len(s_j)
+        venn.ix[i, j] = len(s_i & s_j)
+        venn.ix[j, i] = (len(s_i - s_j), len(s_j - s_i))
+
+    return venn
 
 
 # Recursive defaultdict
