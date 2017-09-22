@@ -394,3 +394,16 @@ def histogram(x, **kwargs):
     hist, bin_edges = np.histogram(x, **kwargs)
     for count, val in zip(hist, bin_edges):
         print('%-20s %d' % (val, count))
+
+
+def report_rate_of_change(source, interval):
+    import time
+
+    y0 = source()
+    t0 = time.time()
+
+    while True:
+        time.sleep(interval)
+        y1 = source()
+        t1 = time.time()
+        print('%.1f items/sec' % ((y1 - y0) / (t1 - t0)))
