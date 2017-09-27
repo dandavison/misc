@@ -10,8 +10,8 @@ jupyter-eval <<EOF
 %pylab inline
 from __future__ import division, print_function
 import sympy as sp
-from sympy import symbols, pi, exp, sin, cos, tan
-from sympy.plotting import plot, plot_parametric
+from sympy import symbols, pi, exp, sqrt, log, sin, cos, tan, Eq
+from sympy.plotting import plot, plot_implicit, plot_parametric
 
-x, y, z, t, theta = symbols("x y z t theta")
+x, y, z, t, r, theta = symbols("x y z t r theta")
 EOF
