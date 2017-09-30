@@ -1,3 +1,11 @@
+def execute_sql(sql):
+    if not sql.rstrip().endswith(';'):
+        sql = sql + ';'
+    c = connection.cursor()
+    c.execute(sql)
+    return c.fetchall()
+
+
 def format_sql(sql):
     import sqlparse
     return sqlparse.format(unicode(sql), reindent=True)
