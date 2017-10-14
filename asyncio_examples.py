@@ -9,8 +9,7 @@ async def task_f():
 
 def example_1():
     ioloop = asyncio.get_event_loop()
-    task = ioloop.create_task(task_f())
-    ioloop.run_until_complete(task)
+    ioloop.run_until_complete(task_f())
     ioloop.close()
 
 
