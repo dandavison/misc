@@ -29,7 +29,7 @@ def a2d(py):
 
 
 T = '''
-from counsyl.product.common.utils.a2d import d2a
+from a2d import d2a
 exec d2a("""
 %s
 """)
