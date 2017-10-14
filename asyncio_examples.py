@@ -3,14 +3,27 @@
 import asyncio
 
 
-async def task_f():
-    print('in task()')
+async def make_coro(i):
+    print('in make_coro %d' % i)
+
+
+class C:
+    async def make_coro(self, i):
+        print('in make_coro method %d' % i)
 
 
 def example_1():
     ioloop = asyncio.get_event_loop()
-    ioloop.run_until_complete(task_f())
+    ioloop.run_until_complete(C().make_coro(1))
     ioloop.close()
 
 
-example_1()
+
+def example_2():
+    ioloop = asyncio.get_event_loop()
+    coros = [make_coro(i) for i in [1, 2]]
+    ioloop.run_until_complete(asyncio.wait(coros))
+    ioloop.close()
+
+
+example_2()
