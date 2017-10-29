@@ -1,3 +1,42 @@
+from copy import deepcopy
+
+
+def partitions(n):
+    """
+    Return a list of all partitions of the set {1, 2, ..., n}
+
+    A partition is a list of parts.
+    A part is a set.
+
+    The parts of a partition are disjoint sets whose union is
+    {1, 2, ..., n}
+    """
+    if n == 0:
+        return [[]]
+    else:
+        _partitions = []
+        for partition in partitions(n - 1):
+
+            # For each part of the n-1 partition, create a new
+            # partition in which the new element is added to that part
+            # and the other parts are unchanged.
+            for i in range(len(partition)):
+                _partition = deepcopy(partition)
+                _partition[i].append(n)
+                _partitions.append(_partition)
+
+            # Also create a new partition in which the new element is
+            # added as a singleton.
+            _partition = deepcopy(partition)
+            _partition.append([n])
+            _partitions.append(_partition)
+
+        return _partitions
+
+
+#### Code below was written a few years earlier
+
+
 def encode(partition):
     """
     Encode list-of-lists partition as an integer.
