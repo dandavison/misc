@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from collections import Counter
+from collections import defaultdict
 from copy import deepcopy
 from itertools import product
 from math import factorial as fac
@@ -11,40 +12,35 @@ def choose(n, k):
     return fac(n) / (fac(k) * fac(n - k))
 
 
-def classify_functions(domain_size, codomain_size):
-    domain, codomain = set(range(domain_size)), set(range(codomain_size))
-    relations = powerset(product(domain, codomain))
-
-    def has_duplicates(_list):
-        return len(set(_list)) == len(_list)
-
+def classify_relations(A, B):
     def is_function(rel):
-        _domain = [a for a, b in rel]
-        return not has_duplicates(_domain)
+        domain = [a for a, b in rel]
+        return len(set(domain)) == len(domain)
 
     def is_injection(rel):
         image = [b for a, b in rel]
-        return not has_duplicates(image)
+        return len(set(image)) == len(image)
 
-    def is_surjection(rel):
+
+    def is_surjection(rel, codomain):
         image = [b for a, b in rel]
         return set(image) == set(codomain)
 
-    cnts = {
-        'function': [],
-        'injection': [],
-        'surjection': [],
-    }
+    A, B = range(A), range(B)
+    relations = list(powerset(product(A, B)))
+
+    cnts = defaultdict(list)
     for rel in relations:
-        print(rel)
+
+        domain = [a for a, b in rel]
+        if set(domain) != set(A):
+            continue
+
         if is_function(rel):
-            _domain = {a for a, b in rel}
-            if _domain != domain:
-                continue
             cnts['function'].append(rel)
             if is_injection(rel):
                 cnts['injection'].append(rel)
-            if is_surjection(rel):
+            if is_surjection(rel, B):
                 cnts['surjection'].append(rel)
     return cnts
 
