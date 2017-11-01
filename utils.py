@@ -415,3 +415,20 @@ def report_rate_of_change(source, interval):
         y1 = source()
         t1 = time.time()
         print('%.1f items/sec' % ((y1 - y0) / (t1 - t0)))
+
+
+def print_diff(obj1, obj2):
+    import datadiff
+    from clint.textui import colored
+
+    red = lambda s: colored.red(s, bold=True)
+    green = lambda s: colored.green(s, bold=True)
+
+    lines = str(datadiff.diff(obj1, obj2)).splitlines()
+    for line in lines:
+        if line.startswith('-'):
+            print(red(line))
+        elif line.startswith('+'):
+            print(green(line))
+        else:
+            print(line)
