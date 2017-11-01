@@ -74,3 +74,20 @@ def get_partitions(n):
             partitions.append(partition + [[n]])
 
         return partitions
+
+def stirling_number_second_kind(n, k):
+    """
+    The number of partitions of size k of a set of size n.
+    """
+    return int((1/fac(k)) * sum(
+        (-1)**i * choose(k, i) * (k - i)**n
+        for i in range(k + 1)
+    ))
+
+
+def bell_number(n):
+    """
+    The number of partitions of a set of size n.
+    """
+    return sum(stirling_number_second_kind(n, k)
+               for k in range(n + 1))
