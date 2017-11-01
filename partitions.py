@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 
-def partitions(n):
+def get_partitions(n):
     """
     Return a list of all partitions of the set {1, 2, ..., n}
 
@@ -14,8 +14,8 @@ def partitions(n):
     if n == 0:
         return [[]]
     else:
-        _partitions = []
-        for partition in partitions(n - 1):
+        partitions = []
+        for partition in get_partitions(n - 1):
 
             # For each part of the n-1 partition, create a new
             # partition in which the new element is added to that part
@@ -23,15 +23,13 @@ def partitions(n):
             for i in range(len(partition)):
                 _partition = deepcopy(partition)
                 _partition[i].append(n)
-                _partitions.append(_partition)
+                partitions.append(_partition)
 
             # Also create a new partition in which the new element is
             # added as a singleton.
-            _partition = deepcopy(partition)
-            _partition.append([n])
-            _partitions.append(_partition)
+            partitions.append(partition + [[n]])
 
-        return _partitions
+        return partitions
 
 
 #### Code below was written a few years earlier
