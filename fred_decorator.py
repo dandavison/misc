@@ -12,12 +12,12 @@ from scipy.optimize import bisect
 
 
 def record_optimization(func, inputs=[], outputs=[]):
-    def recorder(*args, **kwargs):
+    def recorder(self, *args, **kwargs):
         if 'get_record' in kwargs.keys():
             return {'ins': inputs, 'outs': outputs}
         else:
-            output = func(*args, **kwargs)
-            inputs.append(*[args[1:]]) # ignore first arg which is self when used to decorate instance method
+            output = func(self, *args, **kwargs)
+            inputs.append(args)
             outputs.append(output)
             return output
     return recorder
