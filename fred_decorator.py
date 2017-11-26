@@ -1,29 +1,22 @@
-#!/usr/bin/env python3
-
-# coding: utf-8
-
-# In[100]:
-
+#!/usr/bin/env python
 
 from scipy.optimize import bisect
 
 
-# In[101]:
+def record_optimization(func):
 
+    def recorder(self, *args):
+        if not hasattr(self, '_recorder_inputs'):
+            self._recorder_inputs = []
+        if not hasattr(self, '_recorder_outputs'):
+            self._recorder_outputs = []
 
-def record_optimization(func, inputs=[], outputs=[]):
-    def recorder(self, *args, **kwargs):
-        if 'get_record' in kwargs.keys():
-            return {'ins': inputs, 'outs': outputs}
-        else:
-            output = func(self, *args, **kwargs)
-            inputs.append(args)
-            outputs.append(output)
-            return output
+        self._recorder_inputs.append(args)
+        output = func(self, *args)
+        self._recorder_outputs.append(output)
+        return output
+
     return recorder
-
-
-# In[102]:
 
 
 class Optimizer():
@@ -41,15 +34,7 @@ class Optimizer():
         return x - self.target
 
 
-
-# In[103]:
-
-
 optimizer = Optimizer()
 optimizer.optimize()
-
-
-# In[104]:
-
-
-optimizer.error_function(get_record=True)
+print optimizer._recorder_inputs
+print optimizer._recorder_outputs
