@@ -1,0 +1,9 @@
+#!/bin/bash
+
+tmux list-sessions -F '#{session_id}' | \
+    while read session; do
+        tmux list-windows -t $session -F '#{window_id}' | \
+            while read window; do
+                echo tmux find-window -t $session:$window blargit
+            done
+    done

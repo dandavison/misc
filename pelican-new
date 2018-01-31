@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -u
+
+slug=$(echo "$1" | tr ' ' - | tr A-Z a-z | tr -d ?)
+
+file="$slug.md"
+
+cat > $file <<EOF
+Title: $1
+Slug: $slug
+date: $(date '+%Y-%m-%d')
+EOF
+
+$EDITOR "$file"

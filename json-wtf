@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+import json
+from ast import literal_eval
+from sys import stdin, stdout
+
+json.dump(literal_eval(stdin.read()), stdout, sort_keys=True, indent=2)

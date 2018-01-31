@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -u
+
+session=$1
+
+tmux attach -t $session || tmux new-session -s $session

@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -u
+
+# A convenience wrapper around rebase --onto
+
+# git-graft parent child alters the commit graph so that `child` is the  child of `parent`.
+
