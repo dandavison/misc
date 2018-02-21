@@ -424,8 +424,14 @@ def print_diff(obj1, obj2):
     red = lambda s: colored.red(s, bold=True)
     green = lambda s: colored.green(s, bold=True)
 
-    lines = str(datadiff.diff(obj1, obj2)).splitlines()
-    for line in lines:
+    print_git_diff(str(datadiff.diff(obj1, obj2)))
+
+
+def print_git_diff(diff):
+    from clint.textui import colored; green = lambda s: colored.green(s, bold=True)
+    from clint.textui import colored; red = lambda s: colored.red(s, bold=True)
+
+    for line in diff.splitlines():
         if line.startswith('-'):
             print(red(line))
         elif line.startswith('+'):
