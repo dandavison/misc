@@ -48,6 +48,14 @@ process_exit(status)
   /* Else, P is still alive, so we should up wait_status->dead */
   sema_up(w->dead);
 
+  for (w in children) {
+    with_synchronization:
+      w->reference_count--;
+      if (w->reference_count  == 0)
+        free(w);
+  }
+
+
   /* Terminate this thread */
 
 }

@@ -3,10 +3,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[         0,          0]
-NotebookDataLength[    981975,      17719]
-NotebookOptionsPosition[    976050,      17521]
-NotebookOutlinePosition[    976407,      17537]
-CellTagsIndexPosition[    976364,      17534]
+NotebookDataLength[    984120,      17796]
+NotebookOptionsPosition[    977955,      17590]
+NotebookOutlinePosition[    978312,      17606]
+CellTagsIndexPosition[    978269,      17603]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -17517,9 +17517,78 @@ MY5r3yMgX2iL4e7cVY37d71uWP8DyF8/Q7CsZFXhftj5EuwxIsZqyw7uAQCe
   PlotRangePadding->Scaled[0.02],
   Ticks->{Automatic, Automatic}]], "Output",
  CellChangeTimes->{{3.71590994454873*^9, 3.715909950086688*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Integrate", "[", 
+  RowBox[{
+   RowBox[{"x", " ", "y", 
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"x", "^", "2"}], "-", 
+      RowBox[{"y", "^", "2"}]}], ")"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", " ", "0", ",", " ", "b"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", " ", "0", ",", " ", "a"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.730298333644594*^9, 3.7302983627695503`*^9}, {
+   3.730298417230865*^9, 3.730298426047707*^9}, 3.730298759425172*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox["1", "8"], " ", 
+  RowBox[{"(", 
+   RowBox[{
+    RowBox[{
+     RowBox[{"-", 
+      SuperscriptBox["a", "4"]}], " ", 
+     SuperscriptBox["b", "2"]}], "+", 
+    RowBox[{
+     SuperscriptBox["a", "2"], " ", 
+     SuperscriptBox["b", "4"]}]}], ")"}]}]], "Output",
+ CellChangeTimes->{
+  3.73029842973736*^9, {3.73029874022416*^9, 3.730298760611047*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Integrate", "[", 
+  RowBox[{
+   RowBox[{"x", " ", "y", " ", 
+    RowBox[{"Cos", "[", 
+     RowBox[{"y", "+", 
+      RowBox[{
+       RowBox[{"x", "^", "2"}], " ", "y"}]}], "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{"y", ",", "0", ",", "a"}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"x", ",", "0", ",", "b"}], "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.73029955317731*^9, 3.730299553178911*^9}, 
+   3.7302996249922953`*^9}],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox["1", "2"], " ", 
+  RowBox[{"(", 
+   RowBox[{
+    RowBox[{"Cos", "[", "a", "]"}], "-", 
+    FractionBox[
+     RowBox[{
+      SuperscriptBox["b", "2"], "+", 
+      RowBox[{"Cos", "[", 
+       RowBox[{"a", " ", 
+        RowBox[{"(", 
+         RowBox[{"1", "+", 
+          SuperscriptBox["b", "2"]}], ")"}]}], "]"}]}], 
+     RowBox[{"1", "+", 
+      SuperscriptBox["b", "2"]}]]}], ")"}]}]], "Output",
+ CellChangeTimes->{3.7302996264166937`*^9}]
 }, Open  ]]
 },
-WindowSize->{719, 853},
+WindowSize->{719, 851},
 WindowMargins->{{0, Automatic}, {Automatic, 0}},
 FrontEndVersion->"11.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (September \
 21, 2016)",
@@ -17713,6 +17782,14 @@ Cell[901984, 16226, 48920, 837, 348, 30555, 534, "CachedBoxData", "BoxData", \
 Cell[CellGroupData[{
 Cell[950941, 17068, 305, 8, 32, "Input"],
 Cell[951249, 17078, 24785, 440, 430, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[976071, 17523, 507, 13, 32, "Input"],
+Cell[976581, 17538, 387, 13, 45, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[977005, 17556, 453, 13, 32, "Input"],
+Cell[977461, 17571, 478, 16, 55, "Output"]
 }, Open  ]]
 }
 ]
