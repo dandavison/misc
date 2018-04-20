@@ -1,4 +1,3 @@
-```python
 class DB1Client:
     def insert(self, msg):
         # May raise DB1InvalidMessage
@@ -24,4 +23,3 @@ def write_both_successfully_or_leave_two_error_messages(msg):
     except (DB1InvalidMessage, DB2InvalidMessage):
         db1_client.upsert(make_error_message(msg))
         db2_client.upsert(make_error_message(msg))
-```
