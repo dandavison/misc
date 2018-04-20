@@ -1,22 +1,38 @@
 #!/usr/bin/env python3
 import operator
 from itertools import combinations
+from itertools import product
 from functools import reduce
 
 from toolz import compose
 
 
 def P(n, k):
+    """
+    Number of k-tuples from a set of size n.
+    """
+    # P_multiset(n, (1,) * n)
     return prod(n - i for i in range(0, k))
 
 
+def P_multiset(n, counts):
+    """
+    Number of n-tuples from a multiset.
+    """
+    assert sum(counts) == n
+    return prod(C(n - sum(counts[:i]), counts[i]) for i in range(len(counts)))
+
+
 def C(n, k):
-    return P(n, k) / P(k, k)
+    return int(P(n, k) / P(k, k))
 
 
 def prod(x):
     return reduce(operator.mul, x, 1)
 
+
+def tests():
+    assert P(10, 10) == P_multiset(10, (1,) * 10)
 
 
 def tucker_5_2_21():
@@ -62,7 +78,7 @@ def tucker_5_2_21():
         not including both Mr and Mrs Baggins?
         """
         men = {'m1', 'm2', 'm3', 'm4'}
-        women = {'w1', 'w2', 'w3', 'w4'}
+        women = {'w1', 'w2', 'w3', 'w4', 'w5', 'w6'}
 
         return list(
             c
@@ -79,7 +95,7 @@ def tucker_5_2_21():
         not including both Mr and Mrs Baggins?
         """
         men = {'m1', 'm2', 'm3', 'm4'}
-        women = {'w1', 'w2', 'w3', 'w4'}
+        women = {'w1', 'w2', 'w3', 'w4', 'w5', 'w6'}
         people = list(men | women)
 
         ok = set()
@@ -178,6 +194,52 @@ def tucker_5_1_37():
     print((numer, denom))
 
 
+def tucker_5_3_ex_2():
+    """
+    How many different ways are there to select six hot dogs from three varieties of hot dog?
+    """
+    sort = compose(tuple, sorted)
+
+    ans_1 =  len(set(map(sort, product((1, 2, 3), repeat=6))))
+    ans_2 = C(8, 6)
+    assert ans_1 == ans_2
+    return ans_1
+
+
+def tucker_5_3_ex_5():
+    """
+    How many ways are there to form a sequence of 10 letters from four As, four Bs, four Cs, and
+    four Ds if each letter must appear at least twice?
+    """
+    return (P_multiset(4, (3, 1)) * P_multiset(10, (4,2,2,2)) +
+            P_multiset(4, (2, 2)) * P_multiset(10, (3,3,2,2)))
+
+
+def tucker_5_4_ex_4():
+    """
+    How many ways are there to distribute four identical oranges and six distinct apples (each a
+    different variety) into five distinct boxes? In what fraction of these distributions does each
+    box get exactly two objects?
+    """
+    denominator = (5 ** 6) * C(4 + 5 - 1, 5 - 1)
+    numerator = (
+        # Comments illustrate distributions of oranges in each case
+
+        # {2, 2, 0, 0, 0}
+        C(5, 2) * P_multiset(6, (2, 2, 2))
+
+        +
+
+        # {2, 1, 1, 0, 0}
+        5 * C(4, 2) * 6 * 5 * P_multiset(4, (2, 2))
+
+        +
+
+        # {1, 1, 1, 1, 0}
+        C(5, 4) * 6 * 5 * 4 * 3 * P_multiset(2, (2,))
+    )
+    return (numerator, denominator)
+
+
 if __name__ == '__main__':
-    tucker_5_2_21()
-    # tucker_5_1_37()
+    tests()
