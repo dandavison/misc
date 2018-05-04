@@ -28,10 +28,11 @@ def fib3(n):
         else:
             return ith(i - 1) + ith(i - 2)
 
-    return map(ith, range(n))
+    return list(map(ith, range(n)))
 
 
-print fib1(10)
-print fib2(10)
-print fib3(10)
+print()
+print(fib1(10))
+print(fib2(10))
+print(fib3(10))
 
