@@ -3,87 +3,52 @@
 import os
 import sys
 
-#
-# Complete the climbingLeaderboard function below.
-#
-def getRank_3(score, scores):
-    rank = 1
-    cur = None
-    for other_score in scores:
-        if other_score <= score:
+
+def _merge_scores(sorted_scores, unsorted_scores):
+    sorted_scores_1 = iter(sorted_scores)
+    sorted_scores_2 = iter(sorted(unsorted_scores, reverse=True))
+
+    curr_1 = next(sorted_scores_1, None)
+    curr_2 = next(sorted_scores_2, None)
+
+    while True:
+        if curr_1 is None:
+            if curr_2 is not None:
+                yield curr_2, 2
+                yield from ((s, 2) for s in sorted_scores_2)
             break
-        if other_score != cur:
-            rank += 1
-        cur = other_score
-    # print("scores=%s, score=%d, rank=%d" % (scores, score, rank))
-    return rank
-
-def climbingLeaderboard_3(scores, alice):
-    #
-    # Write your code here.
-    #
-    return (getRank_3(score, scores) for score in alice)
-
-
-from bisect import bisect_right as bisect
-
-def getRank_2(score, scores):
-    rank = 1
-    cur = None
-    for other_score in reversed(scores):
-        if other_score <= score:
+        elif curr_2 is None:
+            if curr_1 is not None:
+                yield curr_1, 1
+                yield from ((s, 2) for s in sorted_scores_1)
             break
-        if other_score != cur:
-            rank += 1
-        cur = other_score
-    # rank = len(scores) - rank - 1
-    # print("scores=%s, score=%d, rank=%d" % (scores, score, rank))
-    return rank
+        elif curr_1 > curr_2:
+            yield curr_1, 1
+            curr_1 = next(sorted_scores_1, None)
+        elif curr_1 == curr_2:
+            yield curr_1, 1
+            yield curr_2, 2
+            curr_1 = next(sorted_scores_1, None)
+            curr_2 = next(sorted_scores_2, None)
+        elif curr_2 > curr_1:
+            yield curr_2, 2
+            curr_2 = next(sorted_scores_2, None)
 
 
-def climbingLeaderboard_2(scores, alice):
-    #
-    # Write your code here.
-    #
-    ranks = []
-    prev_score = None
-    scores.sort()
-    for score in alice:
-        if prev_score is not None:
-            scores.remove(prev_score)
-        scores.insert(bisect(scores, score), score)
-        ranks.append(getRank_2(score, scores))
-        prev_score = score
-    return ranks
-
-
-def getRank_1(score, scores):
+def climbingLeaderboard(scores, alice):
+    alice_ranks = {}
+    OTHER, ALICE = 1, 2
+    curr = scores[0]
     rank = 1
-    cur = None
-    for other_score in scores:
-        if other_score <= score:
-            break
-        if other_score != cur:
+
+    for score, who in _merge_scores(scores, alice):
+        if who == OTHER and score < curr:
             rank += 1
-        cur = other_score
-    # print("scores=%s, score=%d, rank=%d" % (scores, score, rank))
-    return rank
+            curr = score
+        elif who == ALICE:
+            alice_ranks[score] = rank if score >= curr else rank + 1
 
-
-def climbingLeaderboard_1(scores, alice):
-    #
-    # Write your code here.
-    #
-    ranks = []
-    prev_score = None
-    for score in alice:
-        if prev_score is not None:
-            scores.remove(prev_score)
-        scores.append(score)
-        scores.sort(reverse=True)
-        ranks.append(getRank(score, scores))
-        prev_score = score
-    return ranks
+    return [alice_ranks[score] for score in alice]
 
 
 if __name__ == '__main__':
@@ -97,7 +62,7 @@ if __name__ == '__main__':
 
     alice = list(map(int, input().rstrip().split()))
 
-    result = climbingLeaderboard_2(scores, alice)
+    result = climbingLeaderboard(scores, alice)
 
     fptr.write('\n'.join(map(str, result)))
     fptr.write('\n')
