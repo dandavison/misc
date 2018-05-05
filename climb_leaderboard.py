@@ -1,38 +1,17 @@
 #!/bin/python3
 
 import os
-import sys
 
 
-def _merge_scores(sorted_scores, unsorted_scores):
-    sorted_scores_1 = iter(sorted_scores)
-    sorted_scores_2 = iter(sorted(unsorted_scores, reverse=True))
-
-    curr_1 = next(sorted_scores_1, None)
-    curr_2 = next(sorted_scores_2, None)
-
-    while True:
-        if curr_1 is None:
-            if curr_2 is not None:
-                yield curr_2, 2
-                yield from ((s, 2) for s in sorted_scores_2)
-            break
-        elif curr_2 is None:
-            if curr_1 is not None:
-                yield curr_1, 1
-                yield from ((s, 2) for s in sorted_scores_1)
-            break
-        elif curr_1 > curr_2:
-            yield curr_1, 1
-            curr_1 = next(sorted_scores_1, None)
-        elif curr_1 == curr_2:
-            yield curr_1, 1
-            yield curr_2, 2
-            curr_1 = next(sorted_scores_1, None)
-            curr_2 = next(sorted_scores_2, None)
-        elif curr_2 > curr_1:
-            yield curr_2, 2
-            curr_2 = next(sorted_scores_2, None)
+def _merge_scores(x, y):
+    if not x:
+        return [(el, 2) for el in y]
+    elif not y:
+        return [(el, 1) for el in x]
+    elif x[0] > y[0]:
+        return [(x[0], 1)] + _merge_scores(x[1:], y)
+    else:
+        return [(y[0], 2)] + _merge_scores(x, y[1:])
 
 
 def climbingLeaderboard(scores, alice):
@@ -41,7 +20,7 @@ def climbingLeaderboard(scores, alice):
     curr = scores[0]
     rank = 1
 
-    for score, who in _merge_scores(scores, alice):
+    for score, who in _merge_scores(scores, sorted(alice, reverse=True)):
         if who == OTHER and score < curr:
             rank += 1
             curr = score
