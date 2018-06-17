@@ -31,6 +31,24 @@ def prod(x):
     return reduce(operator.mul, x, 1)
 
 
+def permutations(x):
+    """
+    The permutations of [head] + tail are given by
+    1. Find all permutations of tail
+    2. For each tail permutation, and for each possible insertion position, emit a permutation with
+       head inserted at that position.
+    """
+    x = tuple(x)
+    if len(x) == 1:
+        yield x
+    else:
+        head, *tail = x
+        tail_perms = permutations(tail)
+        for perm in tail_perms:
+            for i in range(len(perm) + 1):
+                yield perm[:i] + (head,) + perm[i:]
+
+
 def tests():
     assert P(10, 10) == P_multiset(10, (1,) * 10)
 
