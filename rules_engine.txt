@@ -1,0 +1,43 @@
+#+begin_src python
+
+#+end_src
+
+
+
+
+
+
+
+#+begin_src python
+  def get_preimage_queryset(field, value):
+
+      # Ignore rules that don't specify a value for this field
+      rules = [r for r in rules if r[field] is not None]
+
+      matching_rules = [r for r in rules if r[field] == value]
+      non_matching_rules = [r for r in rules if r[field] != value]
+
+      query = reduce(or, matching_rules)
+#+end_src
+
+
+* Definitions
+
+** Rule
+- A Rule is a database row.
+- Its fields are partitioned into Value Fields and Rule Fields.
+- In addition, a Rule has a collection of Predicates
+- For example
+| should_discard | expired | canceled |
+|----------------|---------|----------|
+|                |         |          |
+
+
+** Predicate
+A predicate specifies 3 things:
+- The name of a rule field (rule lookup)
+- The name of a joined database column
+- The query logic for comparing the joined column value to the rule field value
+
+** `get_Q_for_rule(predicate, rule) -> query`
+This function applies a predicate to a rule.

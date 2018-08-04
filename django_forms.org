@@ -1,0 +1,13 @@
+Django forms
+
+| Request         | Requirements                                                  | Implementation                                    |
+|-----------------|---------------------------------------------------------------|---------------------------------------------------|
+| GET <object_id> | Return HTML with widgets containing db values                 | form = Form(initial=get_values_from_db(object_id) |
+|                 |                                                               | form.is_bound = False                             |
+|                 |                                                               | initial values rendered in HTML as ?              |
+|                 |                                                               | do all widgets support initial? dropdowns?        |
+|                 |                                                               |                                                   |
+| POST data       | Validate                                                      | form = Form(data=post_data)                       |
+|                 | If valid: write to db                                         | form.is_valid(), form.errors                      |
+|                 | If invalid: return HTML with* POST data and validation errors | form.is_bound = True                              |
+

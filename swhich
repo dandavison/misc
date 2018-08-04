@@ -1,0 +1,6 @@
+#!/bin/sh
+
+cmd="$1"
+[ -z "$cmd" ] && read $cmd ## accept command names on stdin
+src=$(which $cmd)
+[ -n $src ] && show $src

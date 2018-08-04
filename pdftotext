@@ -1,0 +1,4 @@
+#!/bin/bash -eu
+for f in "$@"; do
+    /usr/local/bin/pdftotext "$f" /dev/stdout
+done
