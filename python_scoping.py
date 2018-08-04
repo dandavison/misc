@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 whitelist = {'s'}
 
@@ -18,3 +18,13 @@ def f():
 
 
 f()
+
+
+def g():
+    print(h_variable)
+
+def h():
+    h_variable = 99
+    g()
+
+h()
