@@ -1,3 +1,8 @@
 #!/usr/bin/env python3
 import socket
-print(socket.getaddrinfo('sfo1-prd-obslb02.counsyl.com', 'www')[0][4][0])
+import sys
+
+if __name__ == '__main__':
+    hostname, = sys.argv[1:]
+    print(hostname)
+    print(socket.getaddrinfo(hostname, 'www')[0][4][0])
