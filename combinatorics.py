@@ -49,6 +49,20 @@ def permutations(x):
                 yield perm[:i] + (head,) + perm[i:]
 
 
+def interleavings(*lists):
+    lists = [l for l in lists if l]
+    if len(lists) == 1:
+        return lists
+    else:
+        _interleavings = []
+        for l in lists:
+            head = l.pop(0)
+            _interleavings.extend([head] + interleaving
+                                  for interleaving in interleavings(*lists))
+            l.insert(0, head)
+    return _interleavings
+
+
 def tests():
     assert P(10, 10) == P_multiset(10, (1,) * 10)
 
