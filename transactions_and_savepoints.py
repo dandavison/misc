@@ -54,13 +54,13 @@ def demo(model_cls):
             model_cls.objects.filter(email='a').delete()
             print_state()  # [b, c, d]
 
-            print('rollback to savepoint 2')
+            print('rollback to savepoint 1')
             # And here we really do rollback the latest object creation
-            transaction.savepoint_rollback(sid_2)
+            transaction.savepoint_rollback(sid_1)
             print_state()  # [a, b, c]
 
-            print('"rollback" to savepoint 1')
-            transaction.savepoint_rollback(sid_1)
+            print('"rollback" to savepoint 2')
+            transaction.savepoint_rollback(sid_2)
             print_state()
 
             # The exception aborts the entire transaction
