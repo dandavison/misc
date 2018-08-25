@@ -1,5 +1,14 @@
+from contextlib import contextmanager
+
 from django.db import connection
 from django.db import transaction
+
+
+@contextmanager
+def rollback():
+    with transaction.atomic():
+        yield
+        transaction.set_rollback(True)
 
 
 def demo(model_cls):
@@ -7,13 +16,16 @@ def demo(model_cls):
     def print_state():
         print(model_cls.objects.values_list('email', flat=True))
 
+    def create(key):
+        model_cls.objects.create(email=key)
+
     model_cls.objects.all().delete()
 
     print('start')
     print(model_cls.objects.all())
 
     print('create a')
-    model_cls.objects.create(email='a')
+    create('a')
     print_state()  # [a]
 
     # We're not in a transaction and, despite not raising an Exception, this doesn't create a real savepoint.
@@ -21,7 +33,7 @@ def demo(model_cls):
     print('savepoint 0 (sid=%r)' % sid_0)
 
     print('create b')
-    model_cls.objects.create(email='b')
+    create('b')
     print_state()  # [a, b]
 
 
@@ -32,41 +44,32 @@ def demo(model_cls):
 
 
     print('start transaction')
-    try:
-        with transaction.atomic():
+    with rollback():
+        print('create c')
+        create('c')
+        print_state()  # [a, b, c]
 
-            print('create c')
-            model_cls.objects.create(email='c')
-            print_state()  # [a, b, c]
-
-            # This is a real savepoint
-            sid_1 = connection.savepoint()
-            print('savepoint 1 (sid=%r)' % sid_1)
+        # This is a real savepoint
+        with rollback():
+            print('savepoint 1')
 
             print('create d')
-            model_cls.objects.create(email='d')
+            create('d')
             print_state()
 
-            sid_2 = connection.savepoint()
-            print('savepoint 2 (sid=%r)' % sid_2)
+            with rollback():
+                print('savepoint 2')
 
-            print('delete a')
-            model_cls.objects.filter(email='a').delete()
-            print_state()  # [b, c, d]
+                print('delete a')
+                model_cls.objects.filter(email='a').delete()
+                print_state()  # [b, c, d]
 
-            print('rollback to savepoint 2')
-            # And here we really do rollback the latest object creation
-            transaction.savepoint_rollback(sid_2)
+                print('rollback to savepoint 2')
+                # And here we really do rollback the latest object creation
             print_state()  # [a, b, c]
 
             print('"rollback" to savepoint 1')
-            transaction.savepoint_rollback(sid_1)
-            print_state()
-
-            # The exception aborts the entire transaction
-            0/0
-    except ZeroDivisionError:
-        pass
+        print_state()
 
     print('after transaction')
     print_state()  # [a, b]
