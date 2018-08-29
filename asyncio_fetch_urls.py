@@ -2,20 +2,27 @@
 
 import asyncio
 
+from aiohttp import ClientSession
 
-async def slow_operation(future):
-    await asyncio.sleep(1)
-    future.set_result('Future is done!')
+
+async def fetch(url):
+    async with ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.read()
+
 
 def got_result(future):
-    print(future.result())
+    print(future.result()[:100])
     loop.stop()
 
+
 loop = asyncio.get_event_loop()
-future = asyncio.Future()
-asyncio.ensure_future(slow_operation(future))
-future.add_done_callback(got_result)
+task = asyncio.ensure_future(fetch('http://www.theguardian.com'))
+task.add_done_callback(got_result)
 try:
     loop.run_forever()
 finally:
     loop.close()
+
+
+1
