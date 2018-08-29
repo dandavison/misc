@@ -11,18 +11,19 @@ async def fetch(url):
             return await response.read()
 
 
-def got_result(future):
-    print(future.result()[:100])
-    loop.stop()
-
-
 loop = asyncio.get_event_loop()
-task = asyncio.ensure_future(fetch('http://www.theguardian.com'))
-task.add_done_callback(got_result)
+urls = ['http://www.gov.uk', 'http://www.theguardian.com']
+
+coros_1 = [fetch(urls[0])]
+coros_2 = [fetch(urls[1])]
+coros = coros_1 + coros_2
+import ipdb ; ipdb.set_trace()
+future = asyncio.gather(*coros)
 try:
-    loop.run_forever()
+    loop.run_until_complete(future)
 finally:
     loop.close()
 
 
-1
+for res in future.result():
+    print(res[:1000], '\n')
