@@ -1,0 +1,1 @@
+PYTHONPATH=/Users/dan/src/3p/rubber-1.5/build/lib /Users/dan/src/3p/rubber-1.5/build/scripts-3.7/rubber $@
