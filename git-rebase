@@ -1,0 +1,9 @@
+#!/bin/bash
+
+emacs-auto-revert -1 || {
+    echo "Failed to disable auto-revert" 1>&2
+    exit 1
+}
+git rebase $@
+status=$?
+emacs-auto-revert 1 && exit $status
