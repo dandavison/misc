@@ -26,16 +26,33 @@ def f():
 
     dt = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
 
-    string_data = string.Template(string_data).substitute(placeholder=dt)
-
-    print('Intermediate string')
+    print('Intermediate string before substitution')
     print(string_data)
 
+    string_data = string.Template(string_data).substitute(placeholder=dt)
+
+    print('Intermediate string after substitution')
+    print(string_data)
+
+    # Must be yaml.load
     python_data = yaml.load(string_data)  # read back to dict  ! bug
 
     print('Final python object')
 
-    return python_data
+    return python_data  # need datetime objects
+
+
+def g():
+    yaml_data = \
+    """
+    key1:
+      {a: 99}
+    key2:
+      {
+        a: 2018-10-05T17:29:12Z
+      }
+    """
+    return yaml.load(yaml_data)
 
 
 print(f())
