@@ -8,25 +8,21 @@ import string
 import yaml
 
 
-def f(json=False):
+def f():
     yaml_data = \
     """
-    key1: 2018-10-05T17:01:31Z
     key2: $placeholder
     """
 
     print('Initial YAML string')
     print(yaml_data)
 
-    python_data = yaml.load(yaml_data)
+    python_data = yaml.load(yaml_data)  # python dict
 
     print('Parsed python object')
     print(python_data)
 
-    if json:
-        string_data = json.dumps(python_data)
-    else:
-        string_data = yaml.dump(python_data)
+    string_data = yaml.dump(python_data)  # turn back to string to do substition
 
     dt = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
 
@@ -35,10 +31,7 @@ def f(json=False):
     print('Intermediate string')
     print(string_data)
 
-    if json:
-        python_data = json.loads(string_data)
-    else:
-        python_data = yaml.load(string_data)
+    python_data = yaml.load(string_data)  # read back to dict  ! bug
 
     print('Final python object')
 
