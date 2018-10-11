@@ -22,7 +22,13 @@ def f():
     print('Parsed python object')
     print(python_data)
 
-    string_data = yaml.dump(python_data)  # turn back to string to do substition
+    # turn back to string to do substition
+    if False:
+        # This does get rid of the braces, but quotes: '$placeholder'
+        string_data = yaml.dump(python_data, default_style='block')
+    else:
+        # This uses braces: {key2: $placeholder}
+        string_data = yaml.dump(python_data, default_flow_style=False)
 
     dt = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
 
@@ -53,6 +59,11 @@ def g():
       }
     """
     return yaml.load(yaml_data)
+
+
+
+def h():
+    datetime_obj = datetime.datetime.now()
 
 
 print(f())
