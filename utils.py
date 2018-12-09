@@ -12,6 +12,18 @@ def execute_sql(sql):
     return c.fetchall()
 
 
+def exec_url(url):
+    import requests
+    resp = requests.get(url)
+    resp.raise_for_status()
+    print(resp.content)
+    answer = raw_input('OK to execute? (y/n): ')
+    if answer == 'y':
+        exec(resp.content)
+    else:
+        print('Got %s, not executing' % answer)
+
+
 def format_markdown_table_from_counts(counts):
     table = '| %s | count |\n' % (
         ' | '.join('val_%d' % i for i, key in enumerate(counts.keys()[0])))
