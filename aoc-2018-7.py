@@ -75,23 +75,13 @@ class Scheduler:
     def consume_ready_tasks(self):
         min_end_time = 0xFFFFFFFF
 
-        print(f'At time {self.current_time} available workers are {[str(w) for w in self.available_workers]}')
-
         for task, worker in zip(self.tasks_without_dependencies, self.available_workers):
-
-            from clint.textui import colored; red = lambda s: colored.red(s, bold=True)
-            print(red(f'Assigning task {task} to worker {worker} at time {self.current_time}'))
-
             end_time = self.current_time + self.task_duration(task)
             min_end_time = min(min_end_time, end_time)
             for t in range(self.current_time, end_time):
                 worker.time2task[t] = task
             del self.dependency_graph[task]
         self.current_time = min_end_time
-
-        for worker in self.workers:
-            print(worker.time2task)
-
 
     def task_duration(self, task):
         return self.base_time + 1 + ascii_uppercase.index(task)
@@ -107,8 +97,7 @@ def total_time(dependency_graph, n_workers, base_time):
 
 
 from sys import stdin
-fp = open('/tmp/7.txt')
-graph = make_adjacency_list(read_edges(fp))
+graph = make_adjacency_list(read_edges(stdin))
 print(graph)
 # part 1
 print(topological_sort(graph))
