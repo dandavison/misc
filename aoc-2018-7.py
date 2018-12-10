@@ -114,24 +114,23 @@ def task_sequence(dependency_graph, n_workers=1, base_time=0):
     return ''.join(map(str, unique(scheduler.task_sequence)))
 
 
-
-
 from sys import stdin
 
-# path, n_workers, base_time = "/tmp/7.txt", 2, 0
-path, n_workers, base_time, expected_order = "/Users/dan/tmp/aoc-2018/input/7.txt", 5, 60, "OKBNLPHCSVWAIRDGUZEFMXYTJQ"
+for path, n_workers, base_time, expected_order in [
+        ("/tmp/7.txt", 2, 0, "CABDFE"),
+        ("/Users/dan/tmp/aoc-2018/input/7.txt", 5, 60, "OKBNLPHCSVWAIRDGUZEFMXYTJQ"),
+]:
+    with open(path) as fp:
+        graph = make_adjacency_list(read_edges(fp))
+    print(sorted((k, ''.join(sorted(v))) for k, v in graph.items()))
 
-with open(path) as fp:
-    graph = make_adjacency_list(read_edges(fp))
-print(sorted((k, ''.join(sorted(v))) for k, v in graph.items()))
+    # part 1
+    topo_sort_order = ''.join(topological_sort(graph))
+    assert topo_sort_order == expected_order
+    assert task_sequence(graph, n_workers=1) == expected_order
+    assert task_sequence(graph, n_workers=1, base_time=60) == expected_order
+    print(topo_sort_order)
 
-# part 1
-topo_sort_order = ''.join(topological_sort(graph))
-assert topo_sort_order == expected_order
-assert task_sequence(graph, n_workers=1) == expected_order
-assert task_sequence(graph, n_workers=1, base_time=60) == expected_order
-print(topo_sort_order)
-
-# part 2
-print(task_sequence(graph, n_workers=n_workers))
-print(total_time(graph, n_workers=n_workers, base_time=base_time))
+    # part 2
+    print(task_sequence(graph, n_workers=n_workers))
+    print(total_time(graph, n_workers=n_workers, base_time=base_time))
