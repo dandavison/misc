@@ -97,9 +97,13 @@ def total_time(dependency_graph, n_workers, base_time):
 
 
 from sys import stdin
-graph = make_adjacency_list(read_edges(stdin))
+
+path, n_workers, base_time = "/tmp/7.txt", 2, 0
+
+with open(path) as fp:
+    graph = make_adjacency_list(read_edges(fp))
 print(sorted((k, ''.join(sorted(v))) for k, v in graph.items()))
 # part 1
 print(''.join(topological_sort(graph)))
 # part 2
-print(total_time(graph, n_workers=2, base_time=0))
+print(total_time(graph, n_workers=n_workers, base_time=base_time))
