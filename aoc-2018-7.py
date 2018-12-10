@@ -2,6 +2,8 @@ from collections import defaultdict
 from itertools import chain
 from string import ascii_uppercase
 
+from toolz import unique
+
 
 def read_edges(fp):
     return [
@@ -51,6 +53,7 @@ class Scheduler:
         self.workers = [Worker(i) for i in range(n_workers)]
         self.base_time = base_time
         self.current_time = 1
+        self.task_sequence = []
 
     @property
     def tasks(self):
@@ -72,7 +75,7 @@ class Scheduler:
     def available_workers(self):
         return [w for w in self.workers if w.is_available(self.current_time)]
 
-    def consume_ready_tasks(self):
+    def consume_tasks(self):
         min_end_time = float('inf')
 
         for task, worker in zip(sorted(self.tasks_without_dependencies), self.available_workers):
@@ -80,8 +83,16 @@ class Scheduler:
             min_end_time = min(min_end_time, end_time)
             for t in range(self.current_time, end_time):
                 worker.time2task[t] = task
+                self.task_sequence.append(task)
             del self.dependency_graph[task]
         self.current_time = min_end_time
+
+    def consume_tasks_until_done(self):
+        while True:
+            if not self.tasks_without_dependencies:
+                return
+            else:
+                self.consume_tasks()
 
     def task_duration(self, task):
         return self.base_time + 1 + ascii_uppercase.index(task)
@@ -89,21 +100,34 @@ class Scheduler:
 
 def total_time(dependency_graph, n_workers, base_time):
     scheduler = Scheduler(dependency_graph, n_workers, base_time)
-    while True:
-        if not scheduler.tasks_without_dependencies:
-            return scheduler.final_task_end_time
-        else:
-            scheduler.consume_ready_tasks()
+    scheduler.consume_tasks_until_done()
+    return scheduler.final_task_end_time
+
+
+def task_sequence(dependency_graph, n_workers=1, base_time=0):
+    scheduler = Scheduler(dependency_graph, n_workers=n_workers, base_time=base_time)
+    scheduler.consume_tasks_until_done()
+    return ''.join(map(str, unique(scheduler.task_sequence)))
+
+
 
 
 from sys import stdin
 
-path, n_workers, base_time = "/tmp/7.txt", 2, 0
+# path, n_workers, base_time = "/tmp/7.txt", 2, 0
+path, n_workers, base_time, expected_order = "/Users/dan/tmp/aoc-2018/input/7.txt", 5, 60, "OKBNLPHCSVWAIRDGUZEFMXYTJQ"
 
 with open(path) as fp:
     graph = make_adjacency_list(read_edges(fp))
 print(sorted((k, ''.join(sorted(v))) for k, v in graph.items()))
+
 # part 1
-print(''.join(topological_sort(graph)))
+topo_sort_order = ''.join(topological_sort(graph))
+assert topo_sort_order == expected_order
+assert task_sequence(graph, n_workers=1) == expected_order
+assert task_sequence(graph, n_workers=1, base_time=60) == expected_order
+print(topo_sort_order)
+
 # part 2
+print(task_sequence(graph, n_workers=n_workers))
 print(total_time(graph, n_workers=n_workers, base_time=base_time))
