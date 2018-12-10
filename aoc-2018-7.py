@@ -14,8 +14,8 @@ def read_edges(fp):
 def make_adjacency_list(edges):
     adjacency_list = defaultdict(list)
     for u, v in edges:
-        adjacency_list[u].append(v)
-        adjacency_list[v] = []
+        adjacency_list[u].extend([v])
+        adjacency_list[v].extend([])
     return dict(adjacency_list)
 
 
@@ -73,9 +73,9 @@ class Scheduler:
         return [w for w in self.workers if w.is_available(self.current_time)]
 
     def consume_ready_tasks(self):
-        min_end_time = 0xFFFFFFFF
+        min_end_time = float('inf')
 
-        for task, worker in zip(self.tasks_without_dependencies, self.available_workers):
+        for task, worker in zip(sorted(self.tasks_without_dependencies), self.available_workers):
             end_time = self.current_time + self.task_duration(task)
             min_end_time = min(min_end_time, end_time)
             for t in range(self.current_time, end_time):
@@ -98,8 +98,8 @@ def total_time(dependency_graph, n_workers, base_time):
 
 from sys import stdin
 graph = make_adjacency_list(read_edges(stdin))
-print(graph)
+print(sorted((k, ''.join(sorted(v))) for k, v in graph.items()))
 # part 1
-print(topological_sort(graph))
+print(''.join(topological_sort(graph)))
 # part 2
 print(total_time(graph, n_workers=2, base_time=0))
