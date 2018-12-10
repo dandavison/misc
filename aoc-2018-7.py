@@ -78,7 +78,12 @@ class Scheduler:
     def consume_tasks(self):
         min_end_time = None
 
-        for task, worker in zip(sorted(self.tasks_without_dependencies), self.available_workers):
+        assignable_tasks = list(zip(sorted(self.tasks_without_dependencies), self.available_workers))
+
+        if not assignable_tasks:
+            return False
+
+        for task, worker in assignable_tasks:
             end_time = self.current_time + self.task_duration(task)
             min_end_time = min(min_end_time, end_time) if min_end_time is not None else end_time
             for t in range(self.current_time, end_time):
@@ -89,12 +94,7 @@ class Scheduler:
         assert min_end_time is not None
         self.current_time = min_end_time
 
-    def consume_tasks_until_done(self):
-        while True:
-            if not self.tasks_without_dependencies:
-                return
-            else:
-                self.consume_tasks()
+        return True
 
     def task_duration(self, task):
         return self.base_time + 1 + ascii_uppercase.index(task)
@@ -102,13 +102,15 @@ class Scheduler:
 
 def total_time(dependency_graph, n_workers, base_time):
     scheduler = Scheduler(dependency_graph, n_workers, base_time)
-    scheduler.consume_tasks_until_done()
+    while scheduler.consume_tasks():
+        pass
     return scheduler.final_task_end_time
 
 
 def task_sequence(dependency_graph, n_workers=1, base_time=0):
     scheduler = Scheduler(dependency_graph, n_workers=n_workers, base_time=base_time)
-    scheduler.consume_tasks_until_done()
+    while scheduler.consume_tasks():
+        pass
     return ''.join(map(str, unique(scheduler.task_sequence)))
 
 
