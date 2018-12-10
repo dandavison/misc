@@ -76,15 +76,17 @@ class Scheduler:
         return [w for w in self.workers if w.is_available(self.current_time)]
 
     def consume_tasks(self):
-        min_end_time = float('inf')
+        min_end_time = None
 
         for task, worker in zip(sorted(self.tasks_without_dependencies), self.available_workers):
             end_time = self.current_time + self.task_duration(task)
-            min_end_time = min(min_end_time, end_time)
+            min_end_time = min(min_end_time, end_time) if min_end_time is not None else end_time
             for t in range(self.current_time, end_time):
                 worker.time2task[t] = task
                 self.task_sequence.append(task)
             del self.dependency_graph[task]
+
+        assert min_end_time is not None
         self.current_time = min_end_time
 
     def consume_tasks_until_done(self):
