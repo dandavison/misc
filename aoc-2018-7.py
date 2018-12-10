@@ -69,7 +69,7 @@ class Scheduler:
 
     @property
     def final_task_end_time(self):
-        return max(chain.from_iterable(w.time2task.keys() for w in self.workers))
+        return max(chain.from_iterable(w.time2task for w in self.workers))
 
     @property
     def available_workers(self):
@@ -77,6 +77,7 @@ class Scheduler:
 
     def consume_tasks(self):
         min_end_time = None
+        min_end_time_tasks = []
 
         assignable_tasks = list(zip(sorted(self.tasks_without_dependencies), self.available_workers))
 
@@ -85,14 +86,26 @@ class Scheduler:
 
         for task, worker in assignable_tasks:
             end_time = self.current_time + self.task_duration(task)
-            min_end_time = min(min_end_time, end_time) if min_end_time is not None else end_time
+
+            if min_end_time is None or end_time < min_end_time:
+                min_end_time = end_time
+                min_end_time_tasks = [(task, time)
+                                      for (task, time) in min_end_time_tasks
+                                      if time == end_time]
+                min_end_time_tasks.append((task, min_end_time))
+
             for t in range(self.current_time, end_time):
                 worker.time2task[t] = task
-                self.task_sequence.append(task)
-            del self.dependency_graph[task]
 
         assert min_end_time is not None
+
+        # Advance the clock
         self.current_time = min_end_time
+
+        # Delete done tasks
+        for task, time in min_end_time_tasks:
+            del self.dependency_graph[task]
+            self.task_sequence.append(task)
 
         return True
 
