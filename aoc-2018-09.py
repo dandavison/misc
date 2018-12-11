@@ -7,6 +7,9 @@ def play(n_players, last_marble):
     scores = defaultdict(int)
     for i in range(1, last_marble + 1):
 
+        if i % 10000 == 0:
+            print(f'{i}/{last_marble}')
+
         player = (i % n_players) or n_players
 
         if i and i % 23 == 0:
