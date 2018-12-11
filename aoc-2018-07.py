@@ -131,7 +131,7 @@ from sys import stdin
 
 for path, n_workers, base_time, expected_order in [
         ("/tmp/7.txt", 2, 0, "CABDFE"),
-        ("/Users/dan/tmp/aoc-2018/input/7.txt", 5, 60, "OKBNLPHCSVWAIRDGUZEFMXYTJQ"),
+        ("/Users/dan/tmp/aoc-2018/input/07.txt", 5, 60, "OKBNLPHCSVWAIRDGUZEFMXYTJQ"),
 ]:
     with open(path) as fp:
         graph = make_adjacency_list(read_edges(fp))
