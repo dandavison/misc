@@ -72,7 +72,17 @@ def factorize(n):
 
 
 @memoized
+def largest_prime_factorize(n):
+    # Return (m, k) where m is the largest prime factor of n and m*k = n.
+    for i in reversed(PRIMES):
+        quot, rem = divmod(n, i)
+        if not rem:
+            return i, quot
+
+
+@memoized
 def get_subsquare_sum(i, j, size):
+    # fac1, fac2 = largest_prime_factorize(size)  This is even slower
     fac1, fac2 = factorize(size)
     if fac2 == 1:
         return SQUARE[i:(i + size), j:(j + size)].sum()
