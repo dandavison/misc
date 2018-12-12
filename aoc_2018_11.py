@@ -6,30 +6,6 @@ from math import sqrt
 import numpy as np
 
 
-def factorize(n):
-    factorized = {}
-
-    def _factorize(n):
-        assert n > 0
-        if n in factorized:
-            return factorized[n]
-
-        if n < 4:
-            factors = Counter([n])
-        else:
-            for i in range(int(sqrt(n)), 2 - 1, -1):
-                quot, rem = divmod(n, i)
-                if not rem:
-                    return factorize(i) + factorize(quot)
-            else:
-                factors = Counter([n])
-
-        factorized[n] = factors
-        return factors
-
-    return _factorize(n)
-
-
 def get_power_level(x, y, serial_number):
     """
     - Find the fuel cell's rack ID, which is its X coordinate plus 10.
@@ -63,33 +39,47 @@ def get_array(serial_number):
     return array
 
 
+def is_prime(n):
+    for i in range(int(sqrt(n)), 2 - 1, -1):
+        if n % i == 0:
+            return False
+    return True
+
+
 SERIAL_NUMBER = 9445
 SQUARE = get_array(SERIAL_NUMBER)
+PRIMES = list(filter(is_prime, range(1, 300 + 1)))
 _CACHE = {}
 
 
 def memoized(f):
     def inner(*args):
-        if args not in _CACHE:
-            _CACHE[args] = f(*args)
-        return _CACHE[args]
+        key = (f.__name__, args)
+        if key not in _CACHE:
+            _CACHE[key] = f(*args)
+        return _CACHE[key]
     return inner
 
 
 @memoized
+def factorize(n):
+    # Return (m, k) where m is the largest factor of n and m * k = n.
+    for i in range(int(sqrt(n)), 2 - 1, -1):
+        quot, rem = divmod(n, i)
+        if not rem:
+            return quot, n // quot
+    return n, 1
+
+
+@memoized
 def get_subsquare_sum(i, j, size):
-    factorization = factorize(size)
-    if len(factorization) == 1:
+    fac1, fac2 = factorize(size)
+    if fac2 == 1:
         return SQUARE[i:(i + size), j:(j + size)].sum()
     else:
-        (largest_factor, largest_factor_exp), *others = sorted(factorization.items(), reverse=True)
-        multiplicity = (largest_factor ** (largest_factor_exp - 1)
-                        * reduce(operator.mul, (fac ** exp for fac, exp in others), 1))
-        return sum(get_subsquare_sum(i + largest_factor * k,
-                                     j + largest_factor * l,
-                                     largest_factor)
-                   for k in range(multiplicity)
-                   for l in range(multiplicity))
+        return sum(get_subsquare_sum(i + fac1 * k, j + fac1 * l, fac1)
+                   for k in range(fac2)
+                   for l in range(fac2))
 
 
 def get_max_subsquare_sum(size):
@@ -107,7 +97,11 @@ def part1():
 def part2():
     [square_size] = set(SQUARE.shape)
     max_sum, max_coord = max((get_subsquare_sum(i, j, size), (i, j, size))
-                             for size in range(1, square_size)
+                             for size in range(square_size, 0, -1)
                              for i in range(square_size - size + 1)
                              for j in range(square_size - size + 1))
     return max_coord
+
+
+print(part1())
+print(part2())
