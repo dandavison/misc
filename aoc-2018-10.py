@@ -1,9 +1,6 @@
 import re
 
-import matplotlib.pyplot as plt
 import numpy as np
-from IPython.display import HTML
-from matplotlib import animation
 
 
 def parse_line(line):
@@ -19,6 +16,9 @@ def parse_line(line):
 
 
 def animate(frames):
+    import matplotlib.pyplot as plt
+    from IPython.display import HTML
+    from matplotlib import animation
     # http://louistiao.me/posts/notebooks/embedding-matplotlib-animations-in-jupyter-as-interactive-javascript-widgets/
     # Does not work
     dpi = 72.0
@@ -79,30 +79,61 @@ with open(path) as fp:
     points, velocities = map(np.array, zip(*map(parse_line, fp)))
 
 
-######################
-nx, ny = 20, 2
-fig, axarr = plt.subplots(nx, ny, figsize=(20, 120))
+def jupyter_notebook_cells():
+    import matplotlib.pyplot as plt
+    ######################
+    nx, ny = 20, 2
+    fig, axarr = plt.subplots(nx, ny, figsize=(20, 120))
 
-offset = 10700
-for i in range(nx):
-    for j in range(ny):
-        t = offset + i + j
-        axarr[i, j].scatter(*get_points(t))
-        axarr[i, j].set_title(f't = {t}')
-
-
-######################
-
-fig = plt.figure(figsize=(12, 2))
-plt.scatter(*get_points(10710))
-
-#########################
-
-def dist(xs, ys):
-    return np.sqrt((xs[1] - xs[0])**2 + (ys[1] - ys[0])**2)
+    offset = 10700
+    for i in range(nx):
+        for j in range(ny):
+            t = offset + i + j
+            axarr[i, j].scatter(*get_points(t))
+            axarr[i, j].set_title(f't = {t}')
 
 
-ts = range(10700, 10720)
-plt.scatter(ts, [dist(*get_points(t)) for t in ts])
+    ######################
 
-##########################
+    fig = plt.figure(figsize=(12, 2))
+    plt.scatter(*get_points(10710))
+
+    #########################
+
+    def dist(xs, ys):
+        return np.sqrt((xs[1] - xs[0])**2 + (ys[1] - ys[0])**2)
+
+
+    ts = range(10700, 10720)
+    plt.scatter(ts, [dist(*get_points(t)) for t in ts])
+
+    ##########################
+
+
+def get_minimum_variance_generation(x, v):
+    x_bar = x.mean(axis=0)
+    v_bar = v.mean(axis=0)
+
+    # centre the data at the origin
+    x = x - x_bar
+
+    t = -(x * (v - v_bar)).sum() / ((v - v_bar)**2).sum()
+
+    return round(float(t))
+
+
+def bitmap_array(points):
+    points = points - points.min(axis=0)
+    img = np.zeros(shape=points.max(axis=0) + 1, dtype='uint8')
+    img[points[:,0], points[:,1]] = 1
+    return img.T * 255
+
+
+def get_message(points, velocities):
+    from PIL import Image
+    from pytesseract import image_to_string
+
+    t = get_minimum_variance_generation(points, velocities)
+    array = bitmap_array(points + t * velocities)
+    img = Image.fromarray(array, mode="L")
+    return image_to_string(img)  # DNW: returns empty string
