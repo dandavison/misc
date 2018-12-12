@@ -1,32 +1,27 @@
 from collections import defaultdict
+from collections import deque
 
 
 def play(n_players, last_marble):
-    circle = [0]
-    curr = 0
+    circle = deque([0])
     scores = defaultdict(int)
     for i in range(1, last_marble + 1):
-
-        if i % 10000 == 0:
-            print(f'{i}/{last_marble}')
 
         player = (i % n_players) or n_players
 
         if i and i % 23 == 0:
-            removed = (curr - 7) % len(circle)
-            scores[player] += i + circle[removed]
-            del circle[removed]
-            curr = removed
+            circle.rotate(-7)
+            removed = circle.pop()
+            scores[player] += i + removed
         else:
-            insertion = ((curr + 2) % len(circle)) or len(circle)
-            circle.insert(insertion, i)  # splicing the list is much slower
-            curr = insertion
+            circle.rotate(2)
+            circle.append(i)
 
         if False:
             print('{i} [{player}] {circle}'.format(
                 i=i,
                 player=player,
-                circle=''.join(('%-3d' if m != circle[curr] else '(%d)') % m for m in circle),
+                circle=''.join(('%-3d' if m != circle[0] else '(%d)') % m for m in circle),
             ))
 
     return max(scores.values())
