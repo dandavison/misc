@@ -43,6 +43,9 @@ class Worker:
     def __str__(self):
         return f'Worker({self.label})'
 
+    def __repr__(self):
+        return self.__str__()
+
     def is_available(self, time):
         return time not in self.time2task
 
@@ -54,6 +57,7 @@ class Scheduler:
         self.base_time = base_time
         self.current_time = 1
         self.task_sequence = []
+        self.running_tasks = set()
 
     @property
     def tasks(self):
@@ -77,22 +81,48 @@ class Scheduler:
 
     def consume_tasks(self):
         min_end_time = None
+        min_end_time_tasks = []
 
-        assignable_tasks = list(zip(sorted(self.tasks_without_dependencies), self.available_workers))
+        assignable_tasks = list(zip(sorted(self.tasks_without_dependencies - self.running_tasks),
+                                    self.available_workers))
+
+        print(f'assignable_tasks: {self.tasks_without_dependencies} - {self.running_tasks} = {assignable_tasks}')
 
         if not assignable_tasks:
-            return False
+            if not self.running_tasks:
+                return False
+            else:
+                min_end_time = min(time for (time, task) in chain.from_iterable(w.time2task.items() for w in self.workers)
+                                   if task in self.running_tasks)
+                min_end_time_tasks = [(task, time) for (time, task) in chain.from_iterable(w.time2task.items() for w in self.workers)
+                                      if time == min_end_time]
 
         for task, worker in assignable_tasks:
             end_time = self.current_time + self.task_duration(task)
-            min_end_time = min(min_end_time, end_time) if min_end_time is not None else end_time
+
+            if min_end_time is None or end_time < min_end_time:
+                min_end_time = end_time
+                min_end_time_tasks = [(task, time)
+                                      for (task, time) in min_end_time_tasks
+                                      if time == min_end_time]
+                min_end_time_tasks.append((task, min_end_time))
+
             for t in range(self.current_time, end_time):
                 worker.time2task[t] = task
-                self.task_sequence.append(task)
-            del self.dependency_graph[task]
+                self.running_tasks.add(task)
 
         assert min_end_time is not None
+
+        # Advance the clock
         self.current_time = min_end_time
+
+        print(f'min_end_time_tasks: {min_end_time_tasks}')
+
+        # Delete done tasks
+        for task, time in min_end_time_tasks:
+            del self.dependency_graph[task]
+            self.running_tasks.remove(task)
+            self.task_sequence.append(task)
 
         return True
 
