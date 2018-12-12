@@ -1,6 +1,32 @@
 from collections import defaultdict
 
 
+class Circle:
+
+    def __init__(self, shard_size=1e5):
+        self.shards = [[]]
+
+    def _get_shard_and_index(self, index):
+        offset = 0
+        for shard in self.shards:
+            if offset + len(shard) >= index:
+                return shard, index - offset
+            else:
+                offset += len(shard)
+
+    def insert(self, index, obj):
+        shard, index = self._get_shard_and_index(index)
+        shard.insert(index, obj)
+
+    def __getitem__(self, index):
+        shard, index = self._get_shard_and_index(index)
+        return shard[index]
+
+    def __delitem__(self, index):
+        shard, index = self._get_shard_and_index(index)
+        del shard[index]
+
+
 def play(n_players, last_marble):
     circle = [0]
     curr = 0
