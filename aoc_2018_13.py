@@ -29,7 +29,7 @@ class Cart:
         """
         The track symbol that would be present if the cart symbol wasn't there.
         """
-        return '|' if self.location.real else '-'
+        return '|' if self.direction.real else '-'
 
 
 @dataclass
@@ -38,7 +38,8 @@ class State:
 
     @property
     def cart_locations(self):
-        return starmap(complex, np.where(np.isin(self.array, list(SYMBOL_2_DIRECTION))))
+        return list(starmap(complex,
+                            np.transpose(np.where(np.isin(self.array, list(SYMBOL_2_DIRECTION))))))
 
     def __getitem__(self, index):
         return self.array[self._get_index(index)]
@@ -48,7 +49,7 @@ class State:
 
     @staticmethod
     def _get_index(index):
-        return int(index.imag), int(index.real)
+        return int(index.real), int(index.imag)
 
     def print(self):
         print()
@@ -65,21 +66,18 @@ def evolve(state, n_generations):
 
     carts.sort(key=lambda c: (c.location.real, c.location.imag))
 
-    import ipdb ; ipdb.set_trace()
-
     for gen in range(n_generations):
         for cart in carts:
             state[cart.location] = '|' if cart.location.real else '-'
 
             print(f'cart at {cart.location} has track {state[cart.location]} and direction {cart.direction}')
-            return
 
             cart.location += cart.direction
             if state[cart.location] == '+':
                 cart.direction *= TURNS[cart.n_turns]
                 cart.location += cart.direction
                 cart.n_turns += 1
-            state[cart.location] = invert_dict(CART_SYMBOLS)[cart.direction]
+            state[cart.location] = invert_dict(SYMBOL_2_DIRECTION)[cart.direction]
 
         state.print()
 
