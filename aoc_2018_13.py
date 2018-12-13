@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from itertools import cycle
+from itertools import starmap
 
 import numpy as np
 
@@ -9,7 +10,13 @@ def parse_input(fp):
     return np.array([list(line.strip('\n')) for line in fp])
 
 
-CART_SYMBOLS = [('>', 1), ('v', -1j), ('^', 1j), ('<', -1)]
+SYMBOL_2_DIRECTION = {
+    '>': +1 + 0j,
+    '^': +0 + 1j,
+    '<': -1 + 0j,
+    'v': +0 - 1j,
+}
+
 TURNS = cycle([1j, 1, -1j])
 
 
@@ -18,10 +25,20 @@ class Cart:
     location: complex
     direction: complex
 
+    def track_symbol(self):
+        """
+        The track symbol that would be present if the cart symbol wasn't there.
+        """
+        return '|' if self.location.real else '-'
+
 
 @dataclass
 class State:
     array: np.array
+
+    @property
+    def cart_locations(self):
+        return starmap(complex, np.where(np.isin(self.array, list(SYMBOL_2_DIRECTION))))
 
     def __getitem__(self, index):
         return self.array[self._get_index(index)]
@@ -31,7 +48,7 @@ class State:
 
     @staticmethod
     def _get_index(index):
-        return int(index.real), int(index.imag)
+        return int(index.imag), int(index.real)
 
     def print(self):
         print()
@@ -41,26 +58,34 @@ class State:
 
 def evolve(state, n_generations):
     carts = []
-    for sym, direction in CART_SYMBOLS:
-        for location in np.where(state == sym):
-            location = complex(*tuple(location))
-            carts.append(Cart(location, direction))
-            state[location] = '|' if location.real else '-'
+
+    for location in state.cart_locations:
+        direction = SYMBOL_2_DIRECTION[state[location]]
+        carts.append(Cart(location, direction))
 
     carts.sort(key=lambda c: (c.location.real, c.location.imag))
+
+    import ipdb ; ipdb.set_trace()
 
     for gen in range(n_generations):
         for cart in carts:
             state[cart.location] = '|' if cart.location.real else '-'
+
+            print(f'cart at {cart.location} has track {state[cart.location]} and direction {cart.direction}')
+            return
+
             cart.location += cart.direction
             if state[cart.location] == '+':
                 cart.direction *= TURNS[cart.n_turns]
                 cart.location += cart.direction
                 cart.n_turns += 1
-            state[cart.location] = next(sym for sym, direction in CART_SYMBOLS
-                                        if direction == cart.direction)
+            state[cart.location] = invert_dict(CART_SYMBOLS)[cart.direction]
 
         state.print()
+
+
+def invert_dict(d):
+    return {v: k for k, v in d.items()}
 
 
 with open('/tmp/13.txt') as fp:
