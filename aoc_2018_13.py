@@ -11,10 +11,10 @@ def parse_input(fp):
 
 
 SYMBOL_2_DIRECTION = {
-    '>': +1 + 0j,
-    '^': +0 + 1j,
-    '<': -1 + 0j,
-    'v': +0 - 1j,
+    '^': +1 + 0j,
+    '>': +0 + 1j,
+    'v': -1 + 0j,
+    '<': +0 - 1j,
 }
 
 TURNS = cycle([1j, 1, -1j])
