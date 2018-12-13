@@ -35,7 +35,9 @@ def parse_input(fp):
 def evolve(state, rules, n_generations):
     _rules = [(tuple(p), y) for p, y in rules]
     assert len(set(_rules)) == len(_rules)
-    for _ in range(n_generations):
+    for gen in range(n_generations):
+        if gen % 10000 == 0:
+            print(gen)
         matched = set()
         next_state = state.copy()
         for i in range(2, len(state) - 3):
@@ -55,13 +57,33 @@ def evolve(state, rules, n_generations):
 
         # print(green(next_state))
 
+        FP.write(f'{gen} {count_plants(state)} {str(state)}\n')
+        FP.flush()
+
+        if np.all(state == next_state):
+            return state
+
         state = next_state
     return state
 
+
+def sum_at(n_generations):
+    return count_plants(evolve(initial_state, rules, n_generations))
+
+def count_plants(state):
+    return np.sum(np.nonzero(state)[0] - len(state) // 3)
 
 with open('/Users/dan/tmp/aoc-2018/input/12.txt') as fp:  # /tmp/12.txt
     initial_state, rules = parse_input(fp)
 
 
 print(initial_state)
-print(np.sum(np.nonzero(evolve(initial_state, rules, 20))[0] - len(initial_state) // 3))
+
+FP = open('/tmp/out', 'w')
+print(sum_at(20))
+FP.close()
+
+FP = open('/tmp/out', 'w')
+print(sum_at(50000000000))
+
+# part2
