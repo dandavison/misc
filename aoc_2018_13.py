@@ -24,7 +24,14 @@ class State:
     array: np.array
 
     def __getitem__(self, index):
-        return self.array[int(index.real), int(index.imag)]
+        return self.array[self._get_index(index)]
+
+    def __setitem__(self, index, value):
+        self.array[self._get_index(index)] = value
+
+    @staticmethod
+    def _get_index(index):
+        return int(index.real), int(index.imag)
 
     def print(self):
         print()
@@ -36,16 +43,22 @@ def evolve(state, n_generations):
     carts = []
     for sym, direction in CART_SYMBOLS:
         for location in np.where(state == sym):
-            carts.append(Cart(complex(*tuple(location)), direction))
+            location = complex(*tuple(location))
+            carts.append(Cart(location, direction))
+            state[location] = '|' if location.real else '-'
 
     carts.sort(key=lambda c: (c.location.real, c.location.imag))
 
     for gen in range(n_generations):
         for cart in carts:
-            cart.location += cart.location + cart.direction
+            state[cart.location] = '|' if cart.location.real else '-'
+            cart.location += cart.direction
             if state[cart.location] == '+':
                 cart.direction *= TURNS[cart.n_turns]
+                cart.location += cart.direction
                 cart.n_turns += 1
+            state[cart.location] = next(sym for sym, direction in CART_SYMBOLS
+                                        if direction == cart.direction)
 
         state.print()
 
