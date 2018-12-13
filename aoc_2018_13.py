@@ -17,13 +17,14 @@ SYMBOL_2_DIRECTION = {
     '<': +0 - 1j,
 }
 
-TURNS = cycle([1j, 1, -1j])
+TURNS = [1j, 1, -1j]
 
 
 @dataclass
 class Cart:
     location: complex
     direction: complex
+    n_turns: int=0
 
     def track_symbol(self):
         """
@@ -74,7 +75,7 @@ def evolve(state, n_generations):
 
             cart.location += cart.direction
             if state[cart.location] == '+':
-                cart.direction *= TURNS[cart.n_turns]
+                cart.direction *= TURNS[cart.n_turns % 3]
                 cart.location += cart.direction
                 cart.n_turns += 1
             state[cart.location] = invert_dict(SYMBOL_2_DIRECTION)[cart.direction]
