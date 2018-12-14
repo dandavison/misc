@@ -86,6 +86,7 @@ class State:
                 if n > 1]
 
     def print(self):
+        return
         self = State(self.array.copy(), self.carts)
         for cart in self.carts:
             self[cart.location] = invert_dict(SYMBOL_2_DIRECTION)[cart.direction]
@@ -96,24 +97,28 @@ def evolve(state, n_generations):
     state.print()
     for gen in range(1, n_generations + 1):
 
-        for cart in state.carts:
+        for cart in list(state.carts):
             cart.location += cart.direction
-            track = state[cart.location]
-            if track == '+':
-                cart.direction *= cart.next_intersection_direction
-                cart.n_intersections += 1
-            elif track in '\/':
-                cart.direction *= cart.get_turn_direction(track)
-        collisions = state.collisions
-        if collisions:
-            state.carts = [c for c in state.carts
-                           if state._get_index(c.location) not in set(collisions)]
-            print(f'{len(collisions)} collisions in generation {gen}. {len(state.carts)} carts left.')
-            if len(state.carts) == 1:
-                state.print()
-                [cart] = state.carts
 
-                return state._get_index(cart.location)
+            collisions = state.collisions
+            if collisions:
+                state.carts = [c for c in state.carts
+                               if state._get_index(c.location) not in set(collisions)]
+                print(f'{len(collisions)} collisions in generation {gen}. {len(state.carts)} carts left.')
+
+            else:
+                track = state[cart.location]
+                if track == '+':
+                    cart.direction *= cart.next_intersection_direction
+                    cart.n_intersections += 1
+                elif track in '\/':
+                    cart.direction *= cart.get_turn_direction(track)
+
+        if len(state.carts) == 1:
+            state.print()
+            [cart] = state.carts
+            return state._get_index(cart.location)
+
         state.print()
 
 
@@ -121,10 +126,13 @@ def invert_dict(d):
     return {v: k for k, v in d.items()}
 
 
-# path = '/Users/dan/tmp/aoc-2018/input/13.txt'
+path = '/Users/dan/tmp/aoc-2018/input/13.txt'
 # path = '/tmp/13.txt'
-path = '/tmp/in'
+# path = '/tmp/in'
 with open(path) as fp:
     state = State(parse_input(fp))
 
 print(evolve(state, 10000000))
+
+
+# (You guessed 137,54.)
