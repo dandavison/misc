@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from itertools import cycle
+from collections import Counter
 from itertools import starmap
 
 import numpy as np
@@ -33,14 +33,14 @@ class Cart:
         """
         |    | \  | /  |
         |----+----+----|
-        |  1 | -j | j  |
-        |  j | j  | -j |
-        | -1 | -j | j  |
-        | -j | j  | -j |
+        |  j | -j | j  |
+        |  1 | j  | -j |
+        | -j | -j | j  |
+        | -1 | j  | -j |
         """
         return {
-            '\\': {1: -1j, 1j: 1j, -1: -1j, -1j: 1j},
-            '/': {1: 1j, 1j: -1j, -1: 1j, -1j: -1j},
+            '\\': {1j: -1j, 1:  1j, -1j: -1j, -1:  1j},
+            '/':  {1j:  1j, 1: -1j, -1j:  1j, -1: -1j},
         }[track][self.direction]
 
     @property
@@ -79,6 +79,12 @@ class State:
     def _get_index(index):
         return int(index.real), int(index.imag)
 
+    @property
+    def collisions(self):
+        return [index
+                for index, n in Counter(self._get_index(cart.location) for cart in self.carts).items()
+                if n > 1]
+
     def print(self):
         self = State(self.array.copy(), self.carts)
         for cart in self.carts:
@@ -87,9 +93,10 @@ class State:
 
 
 def evolve(state, n_generations):
-    for gen in range(n_generations):
+    state.print()
+    for gen in range(1, n_generations + 1):
+
         for cart in state.carts:
-            print(f'cart at {cart.location} has track {cart.track_symbol}, direction {cart.direction}, turn {cart.n_intersections}')
             cart.location += cart.direction
             track = state[cart.location]
             if track == '+':
@@ -97,6 +104,16 @@ def evolve(state, n_generations):
                 cart.n_intersections += 1
             elif track in '\/':
                 cart.direction *= cart.get_turn_direction(track)
+        collisions = state.collisions
+        if collisions:
+            state.carts = [c for c in state.carts
+                           if state._get_index(c.location) not in set(collisions)]
+            print(f'{len(collisions)} collisions in generation {gen}. {len(state.carts)} carts left.')
+            if len(state.carts) == 1:
+                state.print()
+                [cart] = state.carts
+
+                return state._get_index(cart.location)
         state.print()
 
 
@@ -104,8 +121,10 @@ def invert_dict(d):
     return {v: k for k, v in d.items()}
 
 
-with open('/tmp/13.txt') as fp:
+# path = '/Users/dan/tmp/aoc-2018/input/13.txt'
+# path = '/tmp/13.txt'
+path = '/tmp/in'
+with open(path) as fp:
     state = State(parse_input(fp))
 
-state.print()
-evolve(state, 3)
+print(evolve(state, 10000000))
