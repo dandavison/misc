@@ -98,15 +98,13 @@ def evolve(state, n_generations):
     for gen in range(1, n_generations + 1):
 
         for cart in list(state.carts):
-            cart.location += cart.direction
-
-            collisions = state.collisions
-            if collisions:
+            if state._get_index(cart.location + cart.direction) in {state._get_index(c.location) for c in state.carts}:
                 state.carts = [c for c in state.carts
-                               if state._get_index(c.location) not in set(collisions)]
-                print(f'{len(collisions)} collisions in generation {gen}. {len(state.carts)} carts left.')
+                               if state._get_index(c.location) != state._get_index(cart.location + cart.direction)]
+                print(f'collisions in generation {gen}. {len(state.carts)} carts left.')
 
             else:
+                cart.location += cart.direction
                 track = state[cart.location]
                 if track == '+':
                     cart.direction *= cart.next_intersection_direction
@@ -136,3 +134,4 @@ print(evolve(state, 10000000))
 
 
 # (You guessed 137,54.)
+# You guessed 146,110.
