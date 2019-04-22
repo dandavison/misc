@@ -1,7 +1,12 @@
 def format_sql(queryset):
     import sqlparse
-    sql = str(queryset.values_list('pk').query)
-    return sqlparse.format(sql, reindent=True)
+    from django.core.exceptions import EmptyResultSet
+    try:
+        sql = str(queryset.values_list('pk').query)
+    except EmptyResultSet:
+        return 'EmptyResultSet'
+    else:
+        return sqlparse.format(sql, reindent=True)
 
 
 def execute_sql(sql):
@@ -10,6 +15,16 @@ def execute_sql(sql):
     c = connection.cursor()
     c.execute(sql)
     return c.fetchall()
+
+
+if False:
+    from django.utils.termcolors import colorize
+
+    for col in ['red', 'blue']:
+        exec(f"""
+    def {col}(s):
+        print(colorize(s, fg='{col}', opts=['bold']))
+    """)
 
 
 def exec_url(url):
@@ -387,14 +402,15 @@ def bits(x):
 
 def parse_mips_instruction_16(instr):
     opcode, rd, rs, rt, funct = instr[:4], instr[5:8], instr[8:11], instr[11]
+
+
 def histogram_datetimes(dtimes, **kwargs):
     import datetime
     import numpy as np
-
     to_timestamp = np.vectorize(lambda x: (x - datetime.datetime(1970, 1, 1)).total_seconds())
     from_timestamp = np.vectorize(lambda x: datetime.datetime.utcfromtimestamp(x))
 
-    hist, bin_edges = np.histogram(to_timestamp(dtimes), **kwargs)
+    hist, bin_edges = np.histogram(to_timestamp(list(dtimes)), **kwargs)
 
     for count, dt in zip(hist, from_timestamp(bin_edges)):
         print('%-20s %d' % (dt.strftime('%Y-%m-%d'), count))
