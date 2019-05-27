@@ -13,6 +13,9 @@ sys.setrecursionlimit(10000)
 @memoized
 def P_last_is_black(b, w, prev=None):
     """
+    Note: the rules are flipped in this function! You stop when you encounter the first one of the
+    other color. It gives 50% always.
+
     Calculate probability that last removed ball is black.
 
     b:    number of black balls
@@ -25,13 +28,13 @@ def P_last_is_black(b, w, prev=None):
         return 1.0
     else:
         # Probability conditional on removing black next
-        if prev == BLACK:
+        if prev == WHITE:
             P_last_is_black_given_remove_black = P_last_is_black(b,     w, None)
         else:
             P_last_is_black_given_remove_black = P_last_is_black(b - 1, w, BLACK)
 
         # Probability conditional on removing white next
-        if prev == WHITE:
+        if prev == BLACK:
             P_last_is_black_given_remove_white = P_last_is_black(b,     w, None)
         else:
             P_last_is_black_given_remove_white = P_last_is_black(b, w - 1, WHITE)

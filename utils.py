@@ -134,7 +134,7 @@ def paste(max_display_lines=5):
     formatted_code = code.splitlines()
     if len(formatted_code) > max_display_lines:
         formatted_code = formatted_code[:max_display_lines] + ['...']
-    print '\n'.join(formatted_code)
+    print('\n'.join(formatted_code))
     exec(code, globals())
 
 
@@ -179,7 +179,7 @@ def pretty_print(obj):
 
 def pretty_print_dict(d):
     for item in sorted(d.items()):
-        print '%-60s %s' % (item)
+        print('%-60s %s' % (item))
 
 
 def format_tree(root):
@@ -221,11 +221,6 @@ def chdir(to_dir):
     os.chdir(from_dir)
 
 
-def format_sql(sql):
-    import sqlparse
-    return sqlparse.format(unicode(sql), reindent=True)
-
-
 def format_markdown_table_from_counts(counts):
     table = '| %s | count |\n' % (' | '.join('val_%d' % i
                                              for i, key in enumerate(counts.keys()[0])))
@@ -256,7 +251,7 @@ def time(expr):
     from datetime import datetime
     then = datetime.now()
     res = eval(expr)
-    print res.status_code, datetime.now() - then
+    print(res.status_code, datetime.now() - then)
 
 
 def refresh(obj):
@@ -318,7 +313,7 @@ def open_as_html(string):
     path = '/tmp/buffer.html'
     with open(path, 'w') as fp:
         fp.write(string)
-        os.system("open -a /Applications/Google\ Chrome.app %s" % path)
+        os.system(r"open -a /Applications/Google\ Chrome.app %s" % path)
 
 
 def get_enum_map(enum):
@@ -392,7 +387,7 @@ def paste(max_display_lines=5):
     formatted_code = code.splitlines()
     if len(formatted_code) > max_display_lines:
         formatted_code = formatted_code[:max_display_lines] + ['...']
-    print '\n'.join(formatted_code)
+    print('\n'.join(formatted_code))
     exec(code, globals())
 
 def bits(x):
@@ -476,7 +471,7 @@ def max_queries(n, trace=True):
             ret = func(*args, **kwargs)
             q1 = len(connection.queries)
             if trace:
-                print col("%s: %d queries" % (func.__name__, q1 - q0))
+                print(col("%s: %d queries" % (func.__name__, q1 - q0)))
             if q1 - q0 > n:
                 raise AssertionError("%d queries in %s" % (
                     q1 - q0,
@@ -498,7 +493,7 @@ def print_queries(func):
         q0 = len(connection.queries)
         ret = func(*args, **kwargs)
         q1 = len(connection.queries)
-        print col("%s: %d queries" % (func.__name__, q1 - q0))
+        print(col("%s: %d queries" % (func.__name__, q1 - q0)))
         return ret
 
     return wraps(func)(_print_queries)
@@ -541,12 +536,12 @@ def trace(func):
         q0 = len(connection.queries)
         ret = func(*args, **kwargs)
         q1 = len(connection.queries)
-        print "%s(%s, %s): %d queries" % (
+        print("%s(%s, %s): %d queries" % (
             func.__name__,
             args,
             kwargs,
             q1 - q0,
-        )
+        ))
         return ret
 
     return wraps(func)(_print_queries)

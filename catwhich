@@ -1,1 +1,1 @@
-cat `which $1`
+bat `which $1`
