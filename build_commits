@@ -4,14 +4,17 @@ set -e
 
 build () {
     local commit=$1
-    local outfile=$outdir/$commit
+    local i=$2
+    local outfile=$outdir/$(printf "%04s" $i)-$commit
     [ -e $outfile ] && return
     echo $outfile
     git checkout --quiet $commit
-    cargo build --release > /dev/null
-    mv target/release/delta $outfile
+    cargo build --release 2>&1 > /dev/null && \
+        mv target/release/delta $outfile || \
+        echo build failed: $commit
 }
 
 outdir=/tmp/delta
 mkdir -p $outdir
-git rev-list $@ | while read commit; do build $commit; done
+i=1
+git rev-list $@ | tac | while read commit; do build $commit $i; ((i+=1)); done
