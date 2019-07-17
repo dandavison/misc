@@ -12,9 +12,9 @@ def format_sql(queryset):
 def execute_sql(sql):
     if not sql.rstrip().endswith(';'):
         sql = sql + ';'
-    c = connection.cursor()
-    c.execute(sql)
-    return c.fetchall()
+    with connection.cursor() as c:
+        c.execute(sql)
+        return c.fetchall()
 
 
 if False:
