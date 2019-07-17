@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+build () {
+    local commit=$1
+    local outfile=$outdir/$commit
+    [ -e $outfile ] && return
+    echo $outfile
+    git checkout --quiet $commit
+    cargo build --release > /dev/null
+    mv target/release/delta $outfile
+}
+
+outdir=/tmp/delta
+mkdir -p $outdir
+git rev-list $@ | while read commit; do build $commit; done
