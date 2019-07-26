@@ -50,6 +50,25 @@ def permutations(x):
 
 
 def interleavings(*lists):
+    """
+    Return all interleavings of lists.
+
+    >>> interleavings()
+    []
+
+    >>> interleavings([1])
+    [[1]]
+
+    >>> interleavings([1], [2, 3])
+    [[1, 2, 3], [2, 1, 3], [2, 3, 1]]
+
+    >>> from math import factorial
+    >>> choose = lambda n, k: (factorial(n) / factorial(n - k)) / factorial(k)
+    >>> len(interleavings([1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11])) == choose(11, 6)
+    True
+    >>> len(interleavings([1, 2, 3, 4], [5, 6, 7], [8, 9])) == choose(9, 4) * choose(5, 3)
+    True
+    """
     lists = [l for l in lists if l]
     if len(lists) == 1:
         return lists
