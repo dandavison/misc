@@ -1,4 +1,5 @@
 from numpy.random import exponential
+from numpy.random import uniform
 
 
 def simulate_and_estimate(rate):
@@ -36,7 +37,8 @@ def simulate_and_estimate_bounded_2(rate, n):
     potentially_bounded_times = list(all_times[halfway_point:])
     bounded_times = []
     for t in potentially_bounded_times:
-        if t > rate:
+        bound = uniform(1 / rate, 2 * 1 / rate)
+        if t > bound:
             bounded_times.append(rate)
         else:
             times_to_first_event.append(t)

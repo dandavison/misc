@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
-class X(object):
 
+class X:
     def f():
-        print 'hello'
+        print("f")
+
+    def g(self):
+        print("g")
 
     f()
 
