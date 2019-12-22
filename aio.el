@@ -1,8 +1,8 @@
 #!/usr/bin/env emacs --script
 (add-to-list 'load-path "~/src/3p/emacs-aio")
-(require 'aio)
-
+(setq-default lexical-binding t)
 (setq lexical-binding t)
+(require 'aio)
 
 (defun make-promise:call-function (seconds function)
   (let ((promise (aio-promise))
@@ -21,12 +21,13 @@
   (aio-await (make-promise:call-function 3 (lambda () (message "example-2 callback 1"))))
   (aio-await (make-promise:call-function 1 (lambda () (message "example-2 callback 2")))))
 
-(aio-defun example-3 ()
+(defun example-3 ()
   "Run a child process asynchronously."
   (let ((sentinel-file (format "/tmp/example-3-%s" (format-time-string "%s%3N%6N"))))
     (make-process
-     :command `("bash" "-c" ,(format "sleep 2 && touch %s" sentinel-file))
-     :sentinel (lambda () (message "example-3 callback")))))
+     :name "example-3"
+     :command '("bash-wrapper" "-c" "ls -l")
+     :sentinel (lambda (process event) (message "example-3 callback")))))
 
 (defun run (fn)
   (with-current-buffer "*Messages*"
