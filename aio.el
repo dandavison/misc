@@ -8,18 +8,30 @@
 ;; are called in the future, when the task is completed or fails.
 
 ;; In addition, it's possible to write code that looks like normal synchronous code, but which is
-;; in fact asynchronous. This uses `aio-await' and looks like
+;; in fact asynchronous. This uses `aio-defun' and `aio-await' and looks like
 ;;
-;; (aio-await (start-first-task))
-;; (start-second-task)
+;; (first-conventional-code-line)
+;; (start-async-tasks)
+;; (second-conventional-code-line)
+;;
+;; (aio-defun start-async-tasks ()
+;;   (aio-await (start-first-task-and-return-promise))
+;;   (start-second-task))
 ;;
 ;; Here, the second task will only be started when the first is finished. However, the thread is
 ;; not blocked in between. Instead it moves on to execute the next line of conventional code, but
 ;; when the first task finishes, and the thread is idle and available for a context switch,
 ;; start-second-task will be run.
 ;;
-;; Functions like `start-first-task` return an object known as a promise. A promise object contains
-;; two things:
+;; For comparison, in conventional callback-based code, this would look something like:
+;;
+;; (first-conventional-code-line)
+;; (start-first-task-and-do-callback-when-finished
+;;    (lambda () (start-second-task)))
+;; (second-conventional-code-line)
+;;
+;; Functions like `start-first-task-and-return-promise` return an object known as a promise. A
+;; promise object contains two things:
 ;;
 ;; 1. The callbacks that have been registered to be called when the task is finished.
 ;;
