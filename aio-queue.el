@@ -10,6 +10,7 @@
   (message "starting %s" n)
   (aio-await (aio-sleep (runif)))
   (message "checkpoint %s" n)
+  (aio-await (aio-sleep 0))
   (message "finished %s" n))
 
 (setq all-tasks-promise
