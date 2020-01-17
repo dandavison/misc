@@ -10,26 +10,30 @@
 ;; In addition, it's possible to write code that looks like normal synchronous code, but which is
 ;; in fact asynchronous. This uses `aio-defun' and `aio-await' and looks like
 ;;
-;; (first-conventional-code-line)
-;; (start-async-tasks)
-;; (second-conventional-code-line)
-;;
-;; (aio-defun start-async-tasks ()
-;;   (aio-await (start-first-task-and-return-promise))
-;;   (start-second-task))
-;;
+(when nil
+
+  (first-conventional-code-line)
+  (start-async-tasks)
+  (second-conventional-code-line)
+
+  (aio-defun start-async-tasks ()
+    (aio-await (start-first-task-and-return-promise))
+    (start-second-task)))
+
 ;; Here, the second task will only be started when the first is finished. However, the thread is
 ;; not blocked in between. Instead it moves on to execute the next line of conventional code, but
 ;; when the first task finishes, and the thread is idle and available for a context switch,
 ;; start-second-task will be run.
 ;;
 ;; For comparison, in conventional callback-based code, this would look something like:
-;;
-;; (first-conventional-code-line)
-;; (start-first-task-and-do-callback-when-finished
-;;    (lambda () (start-second-task)))
-;; (second-conventional-code-line)
-;;
+
+(when nil
+
+  (first-conventional-code-line)
+  (start-first-task-and-do-callback-when-finished
+   (lambda () (start-second-task)))
+  (second-conventional-code-line))
+
 ;; Functions like `start-first-task-and-return-promise` return an object known as a promise. A
 ;; promise object contains two things:
 ;;
@@ -49,10 +53,10 @@
 ;; To resolve a promise means to:
 ;;
 ;; 1. Construct a "value function". This is a function of no arguments that does/returns something.
-;;     It often has "success" or "failure" semantics.
+;;    It often has "success" or "failure" semantics.
 ;;
-;; 2.  Make a pass through the listener callbacks that have been registered: for each one, call it,
-;;     passing it the value function.
+;; 2. Make a pass through the listener callbacks that have been registered: for each one, call it,
+;;    passing it the value function.
 ;;
 
 ;; Here is an example of a function that starts a task, and returns a promise.
