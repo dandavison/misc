@@ -1,3 +1,5 @@
+import sys
+
 from redis import Redis
 
 redis = Redis(host="localhost", port=6379, db=0)
@@ -8,16 +10,14 @@ def set_keys(n):
         redis.set(i, i)
 
 
-def scan_keys(count):
-    cursor = 0
-    keys = []
-    while True:
-        cursor, key_chunk = redis.scan(cursor=cursor, count=count)
-        keys.append(key_chunk)
-        if cursor == 0:
-            break
+def scan_keys(cursor, count):
+    cursor, keys = redis.scan(cursor=cursor, count=count)
+    print(f"Returned {len(keys)}, cursor={cursor}")
+    return cursor
 
-    total = sum(len(chunk) for chunk in keys)
-    print(f"Returned {total} keys")
 
-    return keys
+if __name__ == "__main__":
+    n_keys = len(redis.keys("*"))
+    print("Number of keys is {n_keys}")
+    [cursor, count] = map(int, sys.argv[1:])
+    print(scan_keys(cursor, count))
