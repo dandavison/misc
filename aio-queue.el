@@ -6,11 +6,17 @@
 (defun runif ()
   (/ (random 100) 100.0))
 
+(defmacro aio-await-low-priority (expr)
+  '(message "hello")
+  `(aio-await ,expr)
+  '(aio-await (aio-sleep 10.0))
+  '(message "bye"))
+
 (aio-defun task (n)
   (message "starting %s" n)
-  (aio-await (aio-sleep (runif)))
+  (aio-await-low-priority (aio-sleep (runif)))
   (message "checkpoint %s" n)
-  (aio-await (aio-sleep 0))
+  (aio-await-low-priority (aio-sleep 0))
   (message "finished %s" n))
 
 (setq all-tasks-promise
