@@ -1,0 +1,16 @@
+#!/bin/bash
+set -u
+regexp="$1"
+python -W ignore <<EOF
+import hypothesis
+
+strategy = hypothesis.strategies.from_regex(r'$regexp')
+seen = set()
+while True:
+    s = strategy.example()
+    if s not in seen:
+        seen.add(s)
+        print(repr(s))
+        if len(seen) > 10:
+            break
+EOF
