@@ -1,0 +1,97 @@
+#!/usr/bin/env emacs --script
+(let ((package-load-list '((dash t) (s t) (f t)))) (package-initialize))
+(require 'f)
+
+;; PNG spec https://www.w3.org/TR/PNG-Structure.html
+;;
+;; E.g.
+;;
+;; ┌────────┬─────────────────────────┬─────────────────────────┬────────┬────────┐
+;; │00000000│ 89 50 4e 47 0d 0a 1a 0a ┊ 00 00 00 0d 49 48 44 52 │×PNG__•_┊000_IHDR│
+;; │00000010│ 00 00 00 64 00 00 00 1d ┊ 08 02 00 00 00 d3 ad 5e │000d000•┊••000××^│
+;; │00000020│ 0a 00 00 00 09 70 48 59 ┊ 73 00 00 0e c4 00 00 0e │_000_pHY┊s00•×00•│
+;; │00000030│ c4 01 95 2b 0e 1b 00 00 ┊ 02 ab 49 44 41 54 68 05 │×•×+••00┊•×IDATh•│
+;;
+;; 01-08: The signature:
+;;            89 50 4e 47 0d 0a 1a 0a
+;;        (--map (format "%02x" it) '(137 80 78 71 13 10 26 10))
+;;         ==> ("89" "50" "4e" "47" "0d" "0a" "1a" "0a")
+;;
+;; 09-12: IHDR length (13):
+;;                                      00 00 00 0d
+;;
+;; 13-16: IHDR type (IHDR):
+;;                                                  49 48 44 52
+;;        (--map (char-to-string (string-to-number it 16)) '("49" "48" "44" "52"))
+;;        ==> ("I" "H" "D" "R")
+;;
+;; 17-29: IHDR data:
+;;           00 00 00 64 00 00 00 1d | 08 02 00 00 00
+;;
+;; 30-33: IHDR CRC:
+;;                                                    d3 ad 5e
+;;           0a
+;;
+;; 34-37: pHYs length (9)
+;;              00 00 00 09
+;;
+;; 38-41: pHYs type (pHYs)
+;;                          70 48 59 ┊ 73
+;;        (--map (char-to-string (string-to-number it 16)) '("70" "48" "59" "73"))
+;;        ==> ("p" "H" "Y" "s")
+;;
+;; 42-50: pHYs data
+;;                                        00 00 0e c4 00 00 0e
+;;             c4 01
+;;        Pixels per unit, X axis: 4 bytes (unsigned integer)
+;;                                        00 00 0e c4
+;;                                        (string-to-number "ec4" 16)
+;;                                        ==> 3780
+;;        Pixels per unit, Y axis: 4 bytes (unsigned integer)
+;;                                                    00 00 0e
+;;             c4
+;;                                        ==> 3780
+;;        Note that 1in = 0.0254m and (* 3780 0.0254) ==> 96.012
+;;
+;;        Unit specifier:          1 byte
+;;                01
+;;
+;; 4.2.5. pHYs Physical pixel dimensions
+;; The pHYs chunk specifies the intended pixel size or aspect ratio for display of the image. It contains:
+;;    Pixels per unit, X axis: 4 bytes (unsigned integer)
+;;    Pixels per unit, Y axis: 4 bytes (unsigned integer)
+;;    Unit specifier:          1 byte
+;; The following values are legal for the unit specifier:
+;;    0: unit is unknown
+;;    1: unit is the meter
+;; When the unit specifier is 0, the pHYs chunk defines pixel aspect ratio only;
+;; the actual size of the pixels remains unspecified.
+;; Conversion note: one inch is equal to exactly 0.0254 meters.
+;;
+;;
+;; So we want to do the following:
+;;
+;; 1. Substitute bytes 42-45 with the requested pixels-per-unit value
+;; 2. Substitute bytes 46-49 with the requested pixels-per-unit value
+;; 3. Ensure that byte 50 is 01
+;;
+;; Usage: png-set-phys ppi infile outfile
+(let* ((m/i 0.0254)
+       (ppi (string-to-number (pop argv)))
+       (ppm (round (/ ppi m/i)))
+       (in-png (f-read-bytes (pop argv)))
+       (out-png (pop argv))
+       (new-bytes)
+       (i 0))
+  (dolist (byte (append in-png nil))
+    (setq i (1+ i))
+    (cond
+     ((or t
+          (< i 42)
+          (> i 50))
+      (push byte new-bytes))
+     ((= i 42)
+      (princ ppm)
+      (princ ppm)
+      (princ 1))))
+  (f-write-bytes (apply #'unibyte-string (nreverse new-bytes)) out-png))
