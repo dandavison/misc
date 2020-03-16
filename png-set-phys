@@ -56,6 +56,8 @@
 ;;        Unit specifier:          1 byte
 ;;                01
 ;;
+;; 51-54: pHYs crc32 checksum
+;;
 ;; 4.2.5. pHYs Physical pixel dimensions
 ;; The pHYs chunk specifies the intended pixel size or aspect ratio for display of the image. It contains:
 ;;    Pixels per unit, X axis: 4 bytes (unsigned integer)
@@ -79,19 +81,26 @@
 (let* ((m/i 0.0254)
        (ppi (string-to-number (pop argv)))
        (ppm (round (/ ppi m/i)))
-       (in-png (f-read-bytes (pop argv)))
-       (out-png (pop argv))
-       (new-bytes)
+       (in-file (f-read-bytes (pop argv)))
+       (out-file (pop argv))
+       (out-bytes)
        (i 0))
-  (dolist (byte (append in-png nil))
+  (assert (< ppm #xFFFFFFFF))
+  (dolist (byte (append in-file nil))
     (setq i (1+ i))
     (cond
-     ((or t
-          (< i 42)
-          (> i 50))
-      (push byte new-bytes))
+     ((or (< i 42)
+          (> i 54))
+      (push byte out-bytes))
      ((= i 42)
-      (princ ppm)
-      (princ ppm)
-      (princ 1))))
-  (f-write-bytes (apply #'unibyte-string (nreverse new-bytes)) out-png))
+      (dolist (_ '(x y))
+        (-map-indexed (lambda (index mask)
+                        (let ((b (lsh (logand mask ppm) (- (* 8 (- 4 (1+ index)))))))
+                          (push b out-bytes)))
+                      '(#xFF000000 #x00FF0000 #x0000FF00 #x000000FF)))
+      (push 1 out-bytes)
+      ;; TODO: This CRC32 is hardcoded based on the pHYs chunk data that results from calling
+      ;; png-set-phys 960 infile outfile
+      (dolist (crc32-byte '(#xD1 #xB2 #xF0 #xC6))
+        (push crc32-byte out-bytes)))))
+  (f-write-bytes (apply #'unibyte-string (nreverse out-bytes)) out-file))
