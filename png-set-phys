@@ -105,15 +105,19 @@
             (> i 54))
         (push byte out-bytes))
        ((= i 42)
-        (setq phys-bytes '(#x70 #x48 #x59 #x73)) ;; p H Y s
+        (setq phys-bytes nil)
+        (dolist (title-byte '(#x70 #x48 #x59 #x73))  ;; p H Y s
+          (push title-byte phys-bytes))
         (dolist (_ '(x y))
           (dolist (ppm-byte (png-phys-unpack ppm))
             (push ppm-byte out-bytes)
             (push ppm-byte phys-bytes)))
         (push 1 out-bytes)
         (push 1 phys-bytes)
-        (dolist (crc-byte (png-phys-crc (nreverse phys-bytes)))
-          (push crc-byte out-bytes)))))
+        (setq phys-bytes (nreverse phys-bytes))
+        (let ((crc-bytes (png-phys-crc phys-bytes)))
+          (dolist (crc-byte crc-bytes)
+            (push crc-byte out-bytes))))))
     (f-write-bytes (apply #'unibyte-string (nreverse out-bytes)) out-file)))
 
 (defun png-phys-crc (bytes)
