@@ -116,6 +116,18 @@
           (push crc-byte out-bytes)))))
     (f-write-bytes (apply #'unibyte-string (nreverse out-bytes)) out-file)))
 
+(defun png-phys-crc (bytes)
+  "Return crc32 checksum of BYTES.
+
+This is a translation of the C code at
+https://www.w3.org/TR/PNG-Structure.html#CRC-algorithm."
+  (let ((register #xFFFFFFFF))
+    (dolist (byte bytes)
+      (setq register (logxor
+                      (png-phys-crc-one-byte (logand (logxor register byte) #xFF))
+                      (lsh register -8))))
+    (png-phys-unpack (logxor register #xFFFFFFFF))))
+
 (defun png-phys-crc-one-byte (n)
   (let* ((c n)
          (polynomial #xEDB88320))
@@ -124,19 +136,6 @@
           (setq c (logxor polynomial (lsh c -1)))
         (setq c (lsh c -1))))
     c))
-
-(defun png-phys-update-crc (c bytes)
-  (dolist (byte bytes)
-    (setq c (logxor (png-phys-crc-one-byte (logand (logxor c byte) #xFF))
-                    (lsh c -8))))
-  c)
-
-(defun png-phys-crc (bytes)
-  "Return crc32 checksum of BYTES.
-
-See
-https://www.w3.org/TR/PNG-Structure.html#CRC-algorithm."
-  (png-phys-unpack (logxor (png-phys-update-crc #xFFFFFFFF bytes) #xFFFFFFFF)))
 
 (ert-deftest png-phys-crc ()
   ;; Consider pHYs chunk data
@@ -158,8 +157,8 @@ https://www.w3.org/TR/PNG-Structure.html#CRC-algorithm."
   "Convert 32-bit WORD to a list of 4 bytes.
 
 A byte is represented as an integer in the range 0-255."
-  (-map-indexed (lambda (index mask) (lsh (logand mask word) (- (png-phys-byte-offset index))))
-                '(#xFF000000 #x00FF0000 #x0000FF00 #x000000FF)))
+  (-map-indexed (lambda (index mask) (lsh (logand mask word) (- (* 8 (- 4 (1+ index))))))
+                '(#xFF000000 #xFF0000 #xFF00 #xFF)))
 
 (ert-deftest png-phys-unpack--test ()
   (should (equal (png-phys-unpack 0) '(0 0 0 0)))
@@ -167,12 +166,6 @@ A byte is represented as an integer in the range 0-255."
   (should (equal (png-phys-unpack 255) '(0 0 0 255)))
   (should (equal (png-phys-unpack 256) '(0 0 1 0))))
 
-(defun png-phys-byte-offset (n)
-  "Return bit offset of N-th byte.
-
-N=0 for the most significant byte, and N=3 for the least significant."
-  (* 8 (- 4 (1+ n))))
-
 (png-set-phys (string-to-number (pop argv))
-              (f-read-bytes (pop argv))
+              (pop argv)
               (pop argv))
