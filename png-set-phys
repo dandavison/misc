@@ -112,62 +112,33 @@
             (push ppm-byte phys-bytes)))
         (push 1 out-bytes)
         (push 1 phys-bytes)
-        (dolist (crc32-byte (png-phys-crc32-13 (nreverse phys-bytes)))
-          (push crc32-byte out-bytes)))))
+        (dolist (crc-byte (png-phys-crc (nreverse phys-bytes)))
+          (push crc-byte out-bytes)))))
     (f-write-bytes (apply #'unibyte-string (nreverse out-bytes)) out-file)))
 
-(defun png-phys-crc32-13 (phys-bytes)
-  "Return crc32 checksum of PHYS-BYTES.
+(defun png-phys-crc-one-byte (n)
+  (let* ((c n)
+         (polynomial #xEDB88320))
+    (dolist (_ (number-sequence 1 8))
+      (if (eq (logand c 1) 1)
+          (setq c (logxor polynomial (lsh c -1)))
+        (setq c (lsh c -1))))
+    c))
 
-PHYS-BYTES is a list of 13 bytes (4 bytes type + 9 bytes data).
-The return value is a 32-bit word, represented as a list of
-bytes. In both cases, a byte is represented as an integer in the
-range 0-255.
+(defun png-phys-update-crc (c bytes)
+  (dolist (byte bytes)
+    (setq c (logxor (png-phys-crc-one-byte (logand (logxor c byte) #xFF))
+                    (lsh c -8))))
+  c)
 
-See https://www.w3.org/TR/PNG-Structure.html#CRC-algorithm
+(defun png-phys-crc (bytes)
+  "Return crc32 checksum of BYTES.
 
-Algorithm here based on the following from https://www.zlib.net/crc_v3.txt:
+See
+https://www.w3.org/TR/PNG-Structure.html#CRC-algorithm."
+  (png-phys-unpack (logxor (png-phys-update-crc #xFFFFFFFF bytes) #xFFFFFFFF)))
 
-  To perform the division perform the following:
-
-  Load the register with zero bits.
-  Augment the message by appending W zero bits to the end of it.
-  While (more message bits)
-     Begin
-     Shift the register left by one bit, reading the next bit of the
-        augmented message into register bit position 0.
-     If (a 1 bit popped out of the register during step 3)
-        Register = Register XOR Poly.
-     End
-    The register now contains the remainder."
-  ;; The input is a list of 13 integers in the range 0-255.
-  (assert (eq (length phys-bytes) 13))
-  (cl-flet ((msb (word) (if (> word #xFFFFFFF) 1 0)))
-    (let* ((polynomial #x04C11DB7)
-           (phys-words (png-phys-pack-13 phys-bytes))
-           (augmented-phys-words (append phys-words '(0)))
-           (register 0))
-      (dolist (word augmented-phys-words)
-        (dolist (_ (-repeat 32 nil))
-          (let ((register-msb (msb register)))
-
-            ;; Left shift the register
-            (setq register (lsh register 1))
-
-            ;; Copy the MSB of the message into the LSB of the register.
-            (setq register (logior register (msb word)))
-
-            (if (eq register-msb 1)
-                ;; If a 1 popped off the register, xor the register with the polynomial.
-                (setq register (logxor register polynomial)))
-
-            ;; Left shift the message.
-            (setq word (lsh word 1)))))
-
-      ;; Return contents of register as list of 4 bytes
-      (png-phys-unpack register))))
-
-(ert-deftest png-phys-crc32-13 ()
+(ert-deftest png-phys-crc ()
   ;; Consider pHYs chunk data
   ;; <-- type -> <--- x ---> <--- y ---> unit
   ;; 70 48 59 73 00 00 93 a3 00 00 93 a3 01
@@ -176,63 +147,12 @@ Algorithm here based on the following from https://www.zlib.net/crc_v3.txt:
   ;; ==> 'd1b2f0c6'
   ;; (--map (format "%0x" it) ... )
   (should (equal
-           (--map (format "%0x" it)
-                  (png-phys-crc32-13 '(#x70 #x48 #x59 #x73 #x00 #x00 #x93 #xa3 #x00 #x00 #x93 #xa3 #x01)))
-           '("d1" "b2" "f0" "c6")))
+           (png-phys-crc '(#x70 #x48 #x59 #x73 #x00 #x00 #x93 #xa3 #x00 #x00 #x93 #xa3 #x01))
+           '(#xD1 #xB2 #xF0 #xC6)))
   (should (equal
-           (--map (format "%0x" it)
-                  (png-phys-crc32-13 '(0 0 0 0 0 0 0 0 0 0 0 0 0)))
-           '("d2" "02" "ef" "8d"))))
+           (png-phys-crc '(0))
+           '(#xD2 #x02 #xEF #x8D))))
 
-
-(defun png-phys-pack (quartet)
-  "Convert list of 4 bytes to 32-bit word.
-
-QUARTET is a list of 4 integers in the range 0-255."
-  (assert (equal (length quartet) 4))
-  (let ((masks '(#xFF000000 #x00FF0000 #x0000FF00 #x000000FF))
-        (register 0))
-    (cl-loop for (index . (byte mask)) in (-zip '(0 1 2 3) quartet masks) do
-             (setq register (logior register (logand mask (lsh byte (png-phys-byte-offset index))))))
-    register))
-
-(ert-deftest png-phys-pack--test ()
-  (should (equal (png-phys-pack '(0 0 0 0)) 0))
-  (should (equal (png-phys-pack '(0 0 0 1)) 1))
-  (should (equal (png-phys-pack '(0 0 0 255)) 255))
-  (should (equal (png-phys-pack '(0 0 1 0)) 256)))
-
-(defun png-phys-pack-13 (bytes)
-  "Convert list of bytes to list of packed 32-bit words.
-
-BYTES is a list of integers in the range 0-255.
-Pack these bytes into 32-bit ints.
-The output is a list of ints."
-  ;; For the pHYs crc32 checksum the input is a list of 13 bytes. We want to structure those
-  ;; 13 bytes as 3 quartets (lists of 4) and one partial quartet (list of 1). We require
-  ;; zero-padding on the left (in the first int). I.e. the list of 1 must hold the first
-  ;; byte, and the subsequent 12 bytes are held in 3 full lists of 4.
-  (assert (eq (length bytes) 13))
-  (setq bytes (append '(0 0 0) bytes))
-  (let ((registers '(0 0 0 0))
-        (quartets (nreverse (mapcar #'nreverse (-partition 4 (nreverse bytes))))))
-    (mapcar #'png-phys-pack quartets)))
-
-(ert-deftest png-phys-pack-13--test ()
-  (should (equal (png-phys-pack-13 '(0 0 0 0 0 0 0 0 0 0 0 0 0))
-                 '(0 0 0 0)))
-  (should (equal (png-phys-pack-13 '(0 0 0 0 0 0 0 0 0 0 0 0 #x1))
-                 '(0 0 0 1)))
-  (should (equal (png-phys-pack-13 '(0 0 0 0 0 0 0 0 0 0 0 0 #xFF))
-                 '(0 0 0 255)))
-  (should (equal (png-phys-pack-13 '(0 0 0 0 0 0 0 0 0 0 0 #x1 #x0))
-                 '(0 0 0 #x100)))
-  (should (equal (png-phys-pack-13 '(0 0 0 0 0 0 0 0 0 0 0 #x7 #x7))
-                 '(0 0 0 #x707)))
-  (should (equal (png-phys-pack-13 '(0 0 0 0 0 0 0 0 0 #x6 #x6 #x7 #x7))
-                 '(0 0 0 #x06060707)))
-  (should (equal (png-phys-pack-13 '(#x5 #x4 #x3 0 0 0 0 0 0 #x6 #x6 #x7 #x7))
-                 '(#x5 #x4030000 0 #x6060707))))
 
 (defun png-phys-unpack (word)
   "Convert 32-bit WORD to a list of 4 bytes.
@@ -253,7 +173,6 @@ A byte is represented as an integer in the range 0-255."
 N=0 for the most significant byte, and N=3 for the least significant."
   (* 8 (- 4 (1+ n))))
 
-(if nil
-    (png-set-phys (string-to-number (pop argv))
-                  (f-read-bytes (pop argv))
-                  (pop argv)))
+(png-set-phys (string-to-number (pop argv))
+              (f-read-bytes (pop argv))
+              (pop argv))
