@@ -91,11 +91,14 @@
 ;; 1       04       C1       1D       B7
 
 (defun png-set-phys (ppi in-file out-file)
+  "Write PNG data with new pHYs chunk to OUT-FILE.
+
+PNG data is read from IN-FILE, and altered such that the pHYs
+chunk specifies size according to PPI."
   (let* ((m/i 0.0254)
          (ppm (round (/ ppi m/i)))
          (in-bytes (f-read-bytes in-file))
          (out-bytes)
-         (phys-bytes)
          (i 0))
     (assert (< ppm #xFFFFFFFF))
     (dolist (byte (append in-bytes nil))
@@ -105,19 +108,18 @@
             (> i 54))
         (push byte out-bytes))
        ((= i 42)
-        (setq phys-bytes nil)
+        ;; Push Data and CRC bytes for the pHYS chunk. 
+        (setq phys-crc-message nil)
         (dolist (title-byte '(#x70 #x48 #x59 #x73))  ;; p H Y s
-          (push title-byte phys-bytes))
+          (push title-byte phys-crc-message))
         (dolist (_ '(x y))
           (dolist (ppm-byte (png-phys-unpack ppm))
             (push ppm-byte out-bytes)
-            (push ppm-byte phys-bytes)))
+            (push ppm-byte phys-crc-message)))
         (push 1 out-bytes)
-        (push 1 phys-bytes)
-        (setq phys-bytes (nreverse phys-bytes))
-        (let ((crc-bytes (png-phys-crc phys-bytes)))
-          (dolist (crc-byte crc-bytes)
-            (push crc-byte out-bytes))))))
+        (push 1 phys-crc-message)
+        (dolist (crc-byte (png-phys-crc (nreverse phys-crc-message)))
+          (push crc-byte out-bytes)))))
     (f-write-bytes (apply #'unibyte-string (nreverse out-bytes)) out-file)))
 
 (defun png-phys-crc (bytes)
@@ -133,6 +135,7 @@ https://www.w3.org/TR/PNG-Structure.html#CRC-algorithm."
     (png-phys-unpack (logxor register #xFFFFFFFF))))
 
 (defun png-phys-crc-one-byte (n)
+  "Return PNG crc32 for the single byte N."
   (let* ((c n)
          (polynomial #xEDB88320))
     (dolist (_ (number-sequence 1 8))
