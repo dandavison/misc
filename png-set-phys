@@ -12,35 +12,35 @@
 ;; │00000020│ 0a 00 00 00 09 70 48 59 ┊ 73 00 00 0e c4 00 00 0e │_000_pHY┊s00•×00•│
 ;; │00000030│ c4 01 95 2b 0e 1b 00 00 ┊ 02 ab 49 44 41 54 68 05 │×•×+••00┊•×IDATh•│
 ;;
-;; 01-08: The signature:
+;; 00-07: The signature:
 ;;            89 50 4e 47 0d 0a 1a 0a
 ;;        (--map (format "%02x" it) '(137 80 78 71 13 10 26 10))
 ;;         ==> ("89" "50" "4e" "47" "0d" "0a" "1a" "0a")
 ;;
-;; 09-12: IHDR length (13):
+;; 08-11: IHDR length (13):
 ;;                                      00 00 00 0d
 ;;
-;; 13-16: IHDR type (IHDR):
+;; 12-15: IHDR type (IHDR):
 ;;                                                  49 48 44 52
 ;;        (--map (char-to-string (string-to-number it 16)) '("49" "48" "44" "52"))
 ;;        ==> ("I" "H" "D" "R")
 ;;
-;; 17-29: IHDR data:
+;; 16-28: IHDR data:
 ;;           00 00 00 64 00 00 00 1d | 08 02 00 00 00
 ;;
-;; 30-33: IHDR CRC:
+;; 29-32: IHDR CRC:
 ;;                                                    d3 ad 5e
 ;;           0a
 ;;
-;; 34-37: pHYs length (9)
+;; 33-36: pHYs length (9)
 ;;              00 00 00 09
 ;;
-;; 38-41: pHYs type (pHYs)
+;; 37-40: pHYs type (pHYs)
 ;;                          70 48 59 ┊ 73
 ;;        (--map (char-to-string (string-to-number it 16)) '("70" "48" "59" "73"))
 ;;        ==> ("p" "H" "Y" "s")
 ;;
-;; 42-50: pHYs data
+;; 41-49: pHYs data
 ;;                                        00 00 0e c4 00 00 0e
 ;;             c4 01
 ;;        Pixels per unit, X axis: 4 bytes (unsigned integer)
@@ -56,7 +56,7 @@
 ;;        Unit specifier:          1 byte
 ;;                01
 ;;
-;; 51-54: pHYs crc32 checksum
+;; 50-53: pHYs crc32 checksum
 ;;
 ;; 4.2.5. pHYs Physical pixel dimensions
 ;; The pHYs chunk specifies the intended pixel size or aspect ratio for display of the image. It contains:
@@ -108,7 +108,7 @@ chunk specifies size according to PPI."
             (> i 54))
         (push byte out-bytes))
        ((= i 42)
-        ;; Push Data and CRC bytes for the pHYS chunk. 
+        ;; Push Data and CRC bytes for the pHYS chunk.
         (setq phys-crc-message nil)
         (dolist (title-byte '(#x70 #x48 #x59 #x73))  ;; p H Y s
           (push title-byte phys-crc-message))
