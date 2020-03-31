@@ -24,6 +24,20 @@ blacken () {
     git commit -m "black"
 }
 
+
+assert_equivalent () {
+    local file=$1
+    git show $base_blackened:$file > /tmp/base.py
+    git show $feature_blackened:$file > /tmp/feature.py
+    python -c "
+import black
+black.assert_equivalent(
+    open('/tmp/base.py').read(),
+    open('/tmp/feature.py').read(),
+)" > /dev/null
+}
+
+
 base="$1"
 feature="$2"
 
@@ -42,4 +56,7 @@ files=$(git diff --name-only --stat $base...$feature -- '*.py')
 blacken $base $base_blackened
 blacken $feature $feature_blackened
 
-git diff $base_blackened $feature_blackened
+for file in $files; do
+    echo $file
+    assert_equivalent $file
+done
