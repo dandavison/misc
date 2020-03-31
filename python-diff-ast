@@ -45,7 +45,6 @@ feature="$2"
 
 base-branch will typically be master"
 
-
 assert_working_directory_clean
 
 base_blackened=$base-$(uuidgen)
@@ -53,6 +52,7 @@ feature_blackened=$feature-$(uuidgen)
 
 files=$(git diff --name-only --stat $base...$feature -- '*.py')
 
+commit_to_restore=$(git rev-parse HEAD)
 blacken $base $base_blackened
 blacken $feature $feature_blackened
 
@@ -60,3 +60,9 @@ for file in $files; do
     echo $file
     assert_equivalent $file
 done
+
+git checkout $commit_to_restore
+echo "You may want to delete the branches created:
+$base_blackened
+$feature_blackened
+"
