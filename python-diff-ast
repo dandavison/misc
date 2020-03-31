@@ -21,7 +21,7 @@ blacken () {
     git checkout -b $branch_blackened
     black $files > /dev/null
     git add $files
-    git commit -m "black"
+    git commit -m "black" || true
 }
 
 
@@ -57,8 +57,12 @@ blacken $base $base_blackened
 blacken $feature $feature_blackened
 
 for file in $files; do
-    echo $file
-    assert_equivalent $file
+    output=$(assert_equivalent $file || true)
+    if [[ -n "$output" ]]; then
+        echo $file
+        echo "$output"
+        echo
+    fi
 done
 
 git checkout $commit_to_restore
