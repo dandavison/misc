@@ -1,0 +1,45 @@
+#!/bin/bash
+
+set -e
+
+die () {
+    echo "$1" 1>&2
+    exit 1
+}
+
+assert_working_directory_clean () {
+    git diff --quiet \
+    && git diff --cached --quiet \
+    && [[ -z "$(git ls-files --other --exclude-standard)" ]] \
+    || die "You have uncommitted files"
+}
+
+blacken () {
+    local branch=$1
+    local branch_blackened=$2
+    git checkout $branch
+    git checkout -b $branch_blackened
+    black $files > /dev/null
+    git add $files
+    git commit -m "black"
+}
+
+base="$1"
+feature="$2"
+
+[[ -n "$base" ]] && [[ -n "$feature" ]] || die "usage: $(basename $0) base-branch feature-branch
+
+base-branch will typically be master"
+
+
+assert_working_directory_clean
+
+base_blackened=$base-$(uuidgen)
+feature_blackened=$feature-$(uuidgen)
+
+files=$(git diff --name-only --stat $base...$feature -- '*.py')
+
+blacken $base $base_blackened
+blacken $feature $feature_blackened
+
+git diff $base_blackened $feature_blackened
