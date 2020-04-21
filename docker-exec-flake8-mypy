@@ -1,0 +1,34 @@
+#!/bin/bash
+# Run docker exec against a container, with special handling of flake8 and mypy.
+#
+# This script is intended for use by host-side editors/IDEs. For example, to create a
+# host-side executable that behaves like flake8, create an executable file named "flake8"
+# containing:
+#
+# #!/bin/bash
+# DOCKER_EXEC_TASK=flake8 docker-exec-flake8-mypy $@
+
+
+die () {
+    echo "$1" 1>&2
+    exit 1
+}
+
+[[ -n "$DOCKER_EXEC_TASK_HOST_PROJECT_ROOT_DIRECTORY" ]] || \
+    die "DOCKER_EXEC_TASK_HOST_PROJECT_ROOT_DIRECTORY environment variable must be set (path to project root directory on host)"
+[[ $DOCKER_EXEC_TASK_HOST_PROJECT_ROOT_DIRECTORY = */ ]] ||  DOCKER_EXEC_TASK_HOST_PROJECT_ROOT_DIRECTORY+=/
+
+container=$(docker container ls -q --filter "label=com.docker.compose.service=$DOCKER_EXEC_SERVICE" | head -n 1)
+[[ -n "$container" ]] || die "No container found for service"
+
+# Relativize all paths occurring in the command line.
+args=$(sed "s,$DOCKER_EXEC_TASK_HOST_PROJECT_ROOT_DIRECTORY,,g" <<<"$@")
+
+docker_exec="docker exec --interactive  $container"
+if [[ "$DOCKER_EXEC_TASK" = "flake8" ]]; then
+    $docker_exec flake8 $args
+elif [[ "$DOCKER_EXEC_TASK" = "mypy" ]]; then
+    $docker_exec mypy --follow-imports=silent $args | sed "s,^,$DOCKER_EXEC_TASK_HOST_PROJECT_ROOT_DIRECTORY,"
+else
+    $docker_exec $args
+fi
