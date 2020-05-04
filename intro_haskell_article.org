@@ -1,0 +1,81 @@
+This is an introduction to Haskell for people who already know one or more programming
+languages. There are lots of introductions to Haskell. This one differs from most in that it is going to move fast, it is not going to act like you've never heard of a pure function, and it is written by someone who doesn't have much experience of Haskell.
+
+I'll assume that the languages you're familiar with are not very similar to Haskell. Haskell is going to be interesting and thought-provoking. The reasons why are going to fall into one of the following categories:
+
+1. It is pure: you cannot change the value of an existing variable; you cannot change the contents of an existing data structure.
+2. It has a rich and powerful static type system.
+3. There is an emphasis on recognizing, and explicitly using, certain recurring "patterns". Several of these are related to or inspired by algebraic structures in mathematics.
+
+Those are the main ones. We'll also mention some other things such as pattern matching, lazy evaluation, and what a "class" is, but they'll mostly fall under one of these 3 categories.
+
+* Purity
+We know what it means for a function to be "pure": a function f is pure if, given input x, it always returns exactly the same value f(x), it doesn't change any other value (has no side effects) and it does no IO (neither reads from nor writes to any file, network socket, terminal or other IO device). Take a look at the description of referential transparency if the term's not familiar.
+
+Of course, it is possible for Haskell code to do IO, but in practice one strictly limits which functions can do this and they are clearly marked by the special machinery required to make it possible. All the rest of the code is strictly pure.
+
+But so what? Most of the functions we write in our "non-pure" languages are pure, unless we are working in an extremely badly written or odd codebase. That's true, so let's briefly note a couple of interesting and only slightly obvious consequences of Haskell being strictly pure:
+
+** You cannot do object-oriented programming.
+In languages supporting OO, such as Python and Java, we have "classes" and these can be "instantiated". An instance of a class is essentially a mutable data structure, wrapped up with some functions ("methods") which read or write the mutable data. You don't and can't do this in a pure language like Haskell.
+
+** You use `map`, comprehensions and recursion instead of for loops.
+"Mapping" a function over a data structure is familiar, and comprehensions will be familiar to Python programmers at least. Assuming that we're mapping a pure function, then it's clear that the overall map/comprehension constructions maintain purity. But there we're dealing with a strictly parallel problem: each element of the returned data structure can be computed independently of other elements.
+
+Slightly less clear is how you implement something like a simulation where the state after each iteration is different but depends on the previous iteration. The answer is recursion of course, and when using Haskell in a simple fashion without fancy abstractions, this takes a form which rapidly becomes rather familiar:
+
+#+begin_src haskell
+  simulation nIterations = helperFunction initialState 0
+      where
+          helperFunction n state
+            | (n == nIterations) = state
+            | otherwise = helperFunction (getNextState state) (n + 1)
+#+end_src
+
+
+OK, so presumably you're not really familiar with reading Haskell code. Clearly it's a bit
+different: function calls do not use parentheses, and there's some weird pattern matching syntax. To make sure we're all on the same page, perhaps it's easiest to just compare the same thing in a language with familiar syntax:
+
+#+begin_src python
+  def simulation(n_iterations):
+
+      def helper_function(state, n):
+          if n == n_iterations:
+              return state
+          else:
+              return helper_function(get_next_state(state), n + 1)
+
+        return helper_function(initial_state)
+#+end_src
+
+So that's a purely-functional implementation (and would be an odd Python style). While we're at it,
+let's also compare a typical implementation with mutable state (impure):
+
+#+begin_src python
+  def simulation(n_iterations):
+      state = initial_state
+      for it in range(n_iterations):
+          state = get_next_state(state)
+      return state
+#+end_src
+
+
+Point? Well, firstly let's all admit that the impure version is the easiest to
+understand. It might be harder to debug, but it's easy to read and it tells a narrative that we
+immediately get since, after all, life basically consists of watching mutable state change over
+time.
+
+Secondly, consider that helper function. In fact, we left out the type signatures in the Haskell
+code. Here they are:
+
+#+begin_src haskell
+  simulation :: Integer -> State
+  helperFunction :: Integer -> State -> State
+#+end_src
+
+So we can see that whereas an impure implementation mutates the state data structure directly, a
+purely functional language instead defines a function which takes in the current state and outputs
+the next state. That is also not a terribly mind-blowing realization: it's easy to understand that
+yes, that is an alternative way to implement a simulation. However, recognizing that a simulation
+consists, abstractly, of a function that maps the current state to the next state, together with
+some boring infrastructure which is common to all simulations, is starting to head in the direction of how Haskell encourages you to think about programs and structure code.

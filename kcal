@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+
+
+def kcal(lbs, metres):
+    kg_per_lb = 0.453592
+    gravity_m_per_s_per_s = 9.8
+    cal_per_Nm = 0.239
+    kg = lbs * kg_per_lb
+    Nm = kg * gravity_m_per_s_per_s * metres
+    cal = Nm * cal_per_Nm
+    return cal / 1000
+
+
+if __name__ == "__main__":
+    import sys
+
+    lbs, metres = map(float, sys.argv[1:])
+    print(lbs, metres)
+    print("%.3f" % kcal(lbs, metres))

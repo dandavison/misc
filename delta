@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DELTA=~/src/delta/target/release/delta
+
+exec $DELTA --commit-style box --commit-color="red" --theme 'GitHub' "$@"

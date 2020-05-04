@@ -1,0 +1,23 @@
+* Mathematica
+
+#+begin_src mathematica :results file :file /tmp/mathematica.svg
+obs = {{-3, 9}, {-2, 4}, {-1, 1}, {0, 0}, {1, 1}, {2, 4}, {3, 9}};
+Export["/tmp/mathematica.svg", ListPlot[obs]]
+#+end_src
+
+
+#+begin_src emacs-lisp :results graphics :file /tmp/mathematica.svg
+(+ 1 1)
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/mathematica.svg]]
+
+
+#+begin_src mathematica :file /tmp/mma.svg
+obs = {{-3, 9}, {-2, 4}, {-1, 1}, {0, 0}, {1, 1}, {2, 4}, {3, 9}};
+Export["/tmp/mma.svg", ListPlot[obs]];
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/mma.svg]]

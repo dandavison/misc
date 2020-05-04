@@ -1,0 +1,8 @@
+_shared_env_vars: &_shared_env_vars
+  - a
+  - b
+  - c
+
+thing:
+  env_vars:
+    <<: *_shared_env_vars

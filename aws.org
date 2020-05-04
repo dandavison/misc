@@ -1,0 +1,16 @@
+Docs
+
+* [[https://docs.aws.amazon.com/elasticloadbalancing/latest/application/application-load-balancer-getting-started.html#configure-load-balancer][Application Load Balancer]]
+  [[https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-listeners.html][Listener]]
+* ECS
+  [[https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-load-balancing.html][load balancing]]
+* Cloudformation
+** ElasticLoadBalancingV2
+   [[https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-elasticloadbalancingv2-listener.html][Listener]]
+   [[https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-elasticloadbalancingv2-targetgroup.html][TargetGroup]]
+** [[https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ecs-service.html][ECSService]]
+   [[https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ecs-service-loadbalancers.html][LoadBalancers]]
+
+* Counsyl
+  https://github.counsyl.com/dev/cloud-formations/blob/master/ecs/swe-services/template.yaml#L1
+  https://github.counsyl.com/dev/cloud-formations/blob/master/salesforce-staging/template.yaml#L112-L123

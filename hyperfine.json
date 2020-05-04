@@ -1,0 +1,19 @@
+{
+  "results": [
+    {
+      "command": "'/tmp/delta/0002-5a4361fa037090adf729ab3f161832d969abc576 < /tmp/23c292d3f25c67082a2ba315a187268be1a9b0ab.gitdiff > /dev/null' '/tmp/delta/0003-4404c17c22e593db5758884e26327309c4ccb219 < /tmp/23c292d3f25c67082a2ba315a187268be1a9b0ab.gitdiff > /dev/null' '/tmp/delta/0004-d4130bad3d9892908e5682659d02924c28182471 < /tmp/23c292d3f25c67082a2ba315a187268be1a9b0ab.gitdiff > /dev/null'  [ERROR]",
+      "mean": 3.0220133333329403e-6,
+      "stddev": 5.234280634483235e-6,
+      "median": 0.0,
+      "user": 5.000000000002832e-8,
+      "system": 0.0,
+      "min": 0.0,
+      "max": 9.066039999998821e-6,
+      "times": [
+        9.066039999998821e-6,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}
