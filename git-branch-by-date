@@ -27,4 +27,4 @@ else
     refs=refs/heads
 fi
 
-git for-each-ref --sort=-committerdate "$refs" --format="$format" | sed "s,^$refs/,," | column -t -s',' | less -X
+git for-each-ref --sort=-committerdate "$refs" --format="$format" | sed "s,^$refs/,," | xsv table | less -X
