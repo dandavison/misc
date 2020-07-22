@@ -9,6 +9,33 @@ HEADERS = {
 }
 
 
+"""
+{
+  repository(name: "delta", owner: "dandavison") {
+    issue(number: 86) {
+      reactions(first: 50) {
+        nodes {
+          user {
+            login
+          }
+        }
+      }
+      comments(first: 3) {
+        nodes {
+          reactions(first: 25) {
+            nodes {
+              user {
+                login
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
 def get_next_chunk(cursor):
     chunk = 100
     after = f', after: "{cursor}"' if cursor is not None else ""

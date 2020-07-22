@@ -16,15 +16,15 @@ flag="$1"
 
 set -u
 
-format='%(refname),%(committerdate:relative)'
+format='%(refname)@%(committerdate:relative)'
 
 if [ -n "$flag" ] && $(git remote | grep -q "$flag") ; then
     refs=refs/remotes/$flag
     if [ "$flag" = origin ]; then
-        format='%(refname),%(committername),%(committerdate:relative)'
+        format='%(refname)@%(committername)@%(committerdate:relative)'
     fi
 else
     refs=refs/heads
 fi
 
-git for-each-ref --sort=-committerdate "$refs" --format="$format" | sed "s,^$refs/,," | xsv table | less -X
+git for-each-ref --sort=-committerdate "$refs" --format="$format" | sed "s,^$refs/,," | xsv table -d '@' | less -X
