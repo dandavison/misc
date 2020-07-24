@@ -1,0 +1,18 @@
+\documentclass{article}
+% \usepackage{adjustbox}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{graphs,graphdrawing}
+\usegdlibrary{trees}
+\begin{document}
+\begin{table}
+  \centering
+  %\begin{tabular}{| {\centering}m{3in} | c | }
+  \begin{tabular}{| >{\centering\bfseries}m{3in} | >{\centering\arraybackslash}m{3in} | }
+    %\adjustbox{valign=m}{To be vertically centred 1}
+    To be vertically centered
+    &
+      \begin{tikzpicture}\graph[tree layout, edges=very thick]{X_1 [as=Best player plays] -> {X_3 [as=Score 1-2]}, X_2 [as=Away game] -> {X_3}, X_3 -> {X_4 [as=Win]}, X_4};\end{tikzpicture}
+  \end{tabular}
+\end{table}
+\end{document}
