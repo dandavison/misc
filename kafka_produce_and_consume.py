@@ -1,18 +1,14 @@
-import json
 import os
 import socket
 
-from kafka import KafkaConsumer
-from kafka import KafkaProducer
+SERVERS = [s.strip() for s in os.environ["KAFKA_SERVERS"].split()]
+TOPIC = "dan-temp-topic"
 
 def check_connection(server):
     sock = socket.socket()
     host, port = server.split(":")
     return sock.connect((host, int(port)))
 
-# E.g.
-# export KAFKA_SERVERS='b-2.lims-staging.x7e7yl.c3.kafka.us-west-2.amazonaws.com:9094 b-1.lims-staging.x7e7yl.c3.kafka.us-west-2.amazonaws.com:9094 b-3.lims-staging.x7e7yl.c3.kafka.us-west-2.amazonaws.com:9094'
-SERVERS = [s.strip() for s in os.environ["KAFKA_SERVERS"].split()]
 
 print("Checking connections to servers...", end="")
 for server in SERVERS:
@@ -22,26 +18,13 @@ print("OK")
 config = dict(bootstrap_servers=SERVERS,
               security_protocol="SSL")
 
-producer = KafkaProducer(value_serializer=lambda x: json.dumps(x).encode('utf-8'), **config)
+# Producer
+from kafka import KafkaProducer
+producer = KafkaProducer(**config)
+fut = producer.send(topic=TOPIC, value=b"dan-message=1")
+
+# Consumer
+from kafka import KafkaConsumer
 consumer = KafkaConsumer(**config)
-
-print("Producing")
-producer.send("dan-temp-topic", "dan-message=1")
-consumer.subscribe(["dan-temp-topic"])
-print("Consuming")
-for i in range(10):
-    print(consumer.poll(1000, 1))
-
-# Checking connections to servers...OK
-# Producing
-# Consuming
-# {}
-# {}
-# {}
-# {}
-# {}
-# {}
-# {}
-# {}
-# {}
-# {}
+consumer.subscribe(TOPIC)
+next(consumer)
