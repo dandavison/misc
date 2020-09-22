@@ -1,15 +1,39 @@
 \documentclass{article}
-\usepackage{array}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{adjustbox}
+\usepackage[T1]{fontenc}
 \usepackage{tikz}
-\usetikzlibrary{graphs,graphdrawing}
-\usegdlibrary{trees}
+\usetikzlibrary{graphs}
+
 \begin{document}
-\begin{table}
-  \centering
-  \begin{tabular}{| >{\centering\bfseries}m{2in} | >{\centering\arraybackslash}m{2in} | }
-    To be vertically centered
-    &
-      \begin{tikzpicture}\graph[tree layout, edges=very thick]{X_1 [as=Best player plays] -> {X_3 [as=Score 1-2]}, X_2 [as=Away game] -> {X_3}, X_3 -> {X_4 [as=Win]}, X_4};\end{tikzpicture}
-  \end{tabular}
-\end{table}
+
+
+\section*{Math}
+Let $n \in \mathbb{N}$, let $\omega \in \mathbb{R}$. An equation:
+\begin{equation*}
+\frac{\partial \mathcal{L}}{\partial q} - \frac{d}{dt}\frac{\partial \mathcal{L}}{\partial \dot{q}} = 0.
+\end{equation*}
+
+
+\section*{A diagram}
+
+\begin{tikzpicture}
+  \graph{A -> B; A -> C; B -> C};
+\end{tikzpicture}
+
+
+\section*{A table}
+
+\begin{tabular}{|c|c|}
+  \hline&\\
+  $p(A)p(B|A)p(C|B)$&\adjustbox{valign=m}{\begin{tikzpicture}\graph{A -> B -> C};\end{tikzpicture}}\\
+  &\\\hline&\\
+  $p(C)p(B|C)p(A|B)$&\adjustbox{valign=m}{\begin{tikzpicture}\graph{A <- B <- C};\end{tikzpicture}}\\
+  &\\\hline&\\
+  $p(B)p(A|B)p(C|B)$&\adjustbox{valign=m}{\begin{tikzpicture}\graph{B -> A, B -> C};\end{tikzpicture}}\\
+  &\\\hline
+\end{tabular}
+
 \end{document}
