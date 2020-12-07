@@ -3,7 +3,6 @@ import socket
 from threading import Thread
 
 SERVERS = [s.strip() for s in os.environ["KAFKA_SERVERS"].split()]
-TOPIC = "dan-temp-topic"
 
 def check_connection(server):
     sock = socket.socket()
@@ -19,14 +18,30 @@ print("OK")
 config = dict(bootstrap_servers=SERVERS,
               security_protocol="SSL")
 
-# Consumer
-from kafka import KafkaConsumer
-consumer = KafkaConsumer(**config)
-consumer.subscribe(TOPIC)
-Thread(target=lambda: print(next(consumer))).start()
+def consume(topic):
+    print(f"consume: topic={topic}")
+    from kafka import KafkaConsumer
+    consumer = KafkaConsumer(**config)
+    consumer.subscribe(topic)
+    def consume_loop():
+        while True:
+            print(next(consumer))
+    Thread(target=consume_loop).start()
 
 
-# Producer
-from kafka import KafkaProducer
-producer = KafkaProducer(**config)
-fut = producer.send(topic=TOPIC, value=b"dan-message=1")
+def produce(topic, msg):
+    print(f"produce: topic={topic} msg='{msg}'")
+    from kafka import KafkaProducer
+    producer = KafkaProducer(**config)
+    fut = producer.send(topic=topic, value=msg.encode("utf-8"))
+    return fut
+
+
+if __name__ == '__main__':
+    import sys
+    topic = sys.argv[1]
+    if len(sys.argv) > 2:
+        msg, = sys.argv[2:]
+        produce(topic, msg)
+    else:
+        consume(topic)
