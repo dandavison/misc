@@ -4,7 +4,4 @@ import sys
 
 JSON_DUMP_KWARGS = {"indent": 2, "sort_keys": True, "allow_nan": False}
 
-with open(sys.stdin) as fp:
-    obj = json.load(fp)
-
-json.dump(obj, sys.stdout, **JSON_DUMP_KWARGS)
+json.dump(json.load(sys.stdin), sys.stdout, **JSON_DUMP_KWARGS)
