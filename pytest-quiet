@@ -1,0 +1,1 @@
+pytest -s --no-header -qqqqq --disable-warnings --no-summary

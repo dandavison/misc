@@ -1,0 +1,13 @@
+query {
+  viewer {
+    pullRequests {
+      edges {
+        node {
+          repository {
+            name
+          }
+        }
+      }
+    }
+  }
+}
