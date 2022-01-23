@@ -1,0 +1,1 @@
+sed -Eu 's/\[[^@-~]*[@-~]//g' | BAT_PAGER='less +F' bat --plain --language=scala
