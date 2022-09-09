@@ -1,0 +1,44 @@
+#!/bin/env python
+"""Plot using altair
+
+Usage:
+  pip install altair docopt pandas
+  altair mark_line [--in | --out | --encode-x | --encode-y | --open]
+
+
+Options:
+  -h --help       Show this screen.
+  --version       Show version.
+  --in=<infile>   Input CSV
+  --out=<outfile> Input HTML
+  --encode-x=<x>  `x` argument to altair.Chart.encode [default: index].
+  --encode-y=<y>  `y` argument to altair.Chart.encode
+  --open
+"""
+import os
+
+import altair as alt
+import pandas as pd
+from docopt import docopt
+
+DEBUG = False
+
+
+def mark_line(**kwargs):
+    infile, outfile, x, y, open = [
+        kwargs[k] for k in ["--in", "--out", "--encode-x", "--encode-y", "--open"]
+    ]
+    d = pd.read_csv(infile).reset_index()
+    chart = alt.Chart(d).mark_line().encode(x=x, y=y)
+    chart.save(outfile, embed_options={"renderer": "svg"})
+    if open:
+        os.system(f"open {outfile}")
+
+
+arguments = docopt(__doc__)  # type: ignore
+if DEBUG:
+    print(arguments)
+elif arguments["mark_line"]:
+    mark_line(**arguments)
+else:
+    print(arguments)
