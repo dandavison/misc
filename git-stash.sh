@@ -2,18 +2,27 @@
 STASH_DIR=~/tmp/git-stash
 mkdir -p "$STASH_DIR"
 
+-git-stash-stash-file() {
+    local stash="$1"
+    if [[ "$stash" != /* ]]; then
+        echo "$STASH_DIR/$stash"
+    else
+        echo "$stash"
+    fi
+}
+
 git-stash-save() {
-    local stash="$STASH_DIR/$1"
+    local stash=$(-git-stash-stash-file "$1")
     git diff HEAD -- $GIT_PATHS >"$stash"
     git apply -R <"$stash"
 }
 
 git-stash-apply() {
-    git apply <"$STASH_DIR/$1"
+    git apply <$(-git-stash-stash-file "$1")
 }
 
 git-stash-show() {
-    delta <"$STASH_DIR/$1"
+    delta <$(-git-stash-stash-file "$1")
 }
 
 git-diff() {

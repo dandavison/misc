@@ -13,6 +13,7 @@
 set -e
 
 flag="$1"
+no_table="$2"
 
 set -u
 
@@ -27,4 +28,12 @@ else
     refs=refs/heads
 fi
 
-git for-each-ref --sort=-committerdate "$refs" --format="$format" | sed "s,^$refs/,," | xsv table -d '@' | less -X
+function branch-by-date() {
+    git for-each-ref --sort=-committerdate "$refs" --format="$format" | sed "s,^$refs/,,"
+}
+
+if [ -n "$no_table" ]; then
+    branch-by-date
+else
+    branch-by-date | xsv table -d '@' | less -X
+fi
