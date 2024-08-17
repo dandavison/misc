@@ -1,0 +1,3 @@
+gh-api '/repos/temporalio/oss-cicd/actions/runs?actor=dandavison' | jq -r '.workflow_runs[] | select(.actor.login == "dandavison") | "\(.id) \(.display_title)"' | grep -v poll | cut -d' ' -f 1 | while read run_id; do gh-api --method DELETE /repos/temporalio/oss-cicd/actions/runs/$run_id; done
+
+jq '.workflow_runs[] | select(.actor.login == "dandavison") | .id' | sed 1d | while read run_id; do gh-api --method DELETE /repos/temporalio/oss-cicd/actions/runs/$run_id; done
